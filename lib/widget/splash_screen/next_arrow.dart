@@ -13,8 +13,8 @@ class NextArrowButton extends StatelessWidget {
         alignment: Alignment.bottomRight,
         child: FloatingActionButton(
           onPressed: onPressed,
-          backgroundColor: Colors.redAccent,
-          child: const Icon(Icons.arrow_forward, size: 32),
+          backgroundColor: Colors.red[200],
+          child: const Icon(Icons.arrow_forward, color: Colors.black, size: 32),
         ),
       ),
     );

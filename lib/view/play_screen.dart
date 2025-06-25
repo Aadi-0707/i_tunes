@@ -56,7 +56,8 @@ class _NowPlayingScreenState extends State<PlayScreen> {
         elevation: 0,
         title: const Text('Playing', style: TextStyle(color: Colors.black)),
         leading: IconButton(
-          icon: const Icon(Icons.back_hand, color: Colors.black),
+          icon:
+              const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -87,6 +88,12 @@ class _NowPlayingScreenState extends State<PlayScreen> {
               currentSong,
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Artist Name',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
             ),
             const SizedBox(height: 40),
             Slider(

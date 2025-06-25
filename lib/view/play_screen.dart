@@ -56,7 +56,7 @@ class _NowPlayingScreenState extends State<PlayScreen> {
         elevation: 0,
         title: const Text('Playing', style: TextStyle(color: Colors.black)),
         leading: IconButton(
-          icon: const Icon(Icons.keyboard_arrow_down, color: Colors.black),
+          icon: const Icon(Icons.back_hand, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
       ),

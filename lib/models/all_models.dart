@@ -359,10 +359,10 @@ class SongModel {
 //   }
 
 //   Map<String, dynamic> toJson() {
-//     final Map<String, dynamic> data = {};
-//     data['rel'] = rel;
-//     data['type'] = type;
-//     data['href'] = href;
+//     final Map<String, dynamic> data = new Map<String, dynamic>();
+//     data['rel'] = this.rel;
+//     data['type'] = this.type;
+//     data['href'] = this.href;
 //     return data;
 //   }
 // }
@@ -378,7 +378,7 @@ class SongModel {
 //         ? Link.fromJson(json['im:contentType'])
 //         : null;
 //     attributes = json['attributes'] != null
-//         ? IdAttributes.fromJson(json['attributes'])
+//         ? IDAttributes.fromJson(json['attributes'])
 //         : null;
 //   }
 
@@ -394,6 +394,8 @@ class SongModel {
 //   }
 // }
 
+class IDAttributes {}
+
 // class ContentTypeAttributes {
 //   String? term;
 //   String? label;
@@ -406,9 +408,9 @@ class SongModel {
 //   }
 
 //   Map<String, dynamic> toJson() {
-//     final Map<String, dynamic> data = {};
-//     data['term'] = term;
-//     data['label'] = label;
+//     final Map<String, dynamic> data = new Map<String, dynamic>();
+//     data['term'] = this.term;
+//     data['label'] = this.label;
 //     return data;
 //   }
 // }
@@ -537,11 +539,11 @@ class SongModel {
 //   }
 
 //   Map<String, dynamic> toJson() {
-//     final Map<String, dynamic> data = {};
-//     data['im:id'] = imId;
-//     data['term'] = term;
-//     data['scheme'] = scheme;
-//     data['label'] = label;
+//     final Map<String, dynamic> data = new Map<String, dynamic>();
+//     data['im:id'] = this.imId;
+//     data['term'] = this// .term;
+//     data['scheme'] = this.scheme;
+//     data['label'] = this.label;
 //     return data;
 //   }
 // }

@@ -52,9 +52,9 @@ class _NowPlayingScreenState extends State<PlayScreen> {
   Widget build(BuildContext context) {
     String currentSong = hindiSongs[currentSongIndex];
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.redAccent[50],
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.redAccent[50],
         elevation: 0,
         title: Text('Playing', style: TextStyle(color: Colors.black)),
         leading: IconButton(
@@ -78,7 +78,7 @@ class _NowPlayingScreenState extends State<PlayScreen> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.9),
+                    color: Colors.black.withOpacity(0.5),
                     blurRadius: 20.r,
                   ),
                 ],
@@ -99,7 +99,7 @@ class _NowPlayingScreenState extends State<PlayScreen> {
             SizedBox(height: 20.h),
             Row(
               children: [
-                const Text("15:39", style: TextStyle(color: Colors.grey)),
+                const Text("0:39", style: TextStyle(color: Colors.grey)),
                 Expanded(
                   child: Slider(
                     value: progress,
@@ -110,10 +110,10 @@ class _NowPlayingScreenState extends State<PlayScreen> {
                         progress = value;
                       });
                     },
-                    activeColor: Colors.redAccent,
+                    activeColor: Colors.red,
                   ),
                 ),
-                const Text("0:46", style: TextStyle(color: Colors.grey)),
+                const Text("3:46", style: TextStyle(color: Colors.grey)),
               ],
             ),
             SizedBox(height: 20.h),
@@ -129,7 +129,7 @@ class _NowPlayingScreenState extends State<PlayScreen> {
                     isPlaying
                         ? Icons.pause_circle_filled
                         : Icons.play_circle_fill,
-                    color: Colors.redAccent,
+                    color: Colors.red,
                     size: 60.w,
                   ),
                   onPressed: () {

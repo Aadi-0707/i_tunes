@@ -13,7 +13,7 @@ class Dot extends StatelessWidget {
       children: List.generate(3, (index) {
         bool isActive = index == activeIndex;
         return AnimatedContainer(
-          duration: Duration(milliseconds: 300),
+          duration: Duration(milliseconds: 10),
           margin: EdgeInsets.symmetric(horizontal: 6.w),
           width: 12.w,
           height: 12.h,

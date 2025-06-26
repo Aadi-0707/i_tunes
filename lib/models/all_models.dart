@@ -13,7 +13,7 @@ class SongModel {
     return SongModel(
       title: json['im:name']['label'],
       artist: json['im:artist']['label'],
-      imageUrl: json['im:image'][2]['label'],
+      imageUrl: json['im:image']['label'],
     );
   }
 }

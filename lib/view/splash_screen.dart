@@ -50,6 +50,7 @@ class SecondSplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     int activeIndex = 1;
     return Scaffold(
+      backgroundColor: Colors.redAccent[50],
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -90,6 +91,7 @@ class ThirdSplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     int activeIndex = 2;
     return Scaffold(
+      backgroundColor: Colors.redAccent[50],
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

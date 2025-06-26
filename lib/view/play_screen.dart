@@ -11,9 +11,10 @@ class PlayScreen extends StatefulWidget {
 }
 
 class _NowPlayingScreenState extends State<PlayScreen> {
-  double progress = 0.3;
+  double progress = 15.0;
   int currentSongIndex = 0;
   bool isPlaying = false;
+  double totalDuration = 166.0;
 
   List<String> hindiSongs = [
     'Tere Liye - Veer Zaara',
@@ -65,9 +66,9 @@ class _NowPlayingScreenState extends State<PlayScreen> {
         padding: EdgeInsets.symmetric(horizontal: 24.0.w, vertical: 20.h),
         child: Column(
           children: [
-            SizedBox(height: 40.h),
+            SizedBox(height: 30.h),
             Container(
-              height: 400.h,
+              height: 300.h,
               width: 300.w,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20.r),
@@ -83,7 +84,7 @@ class _NowPlayingScreenState extends State<PlayScreen> {
                 ],
               ),
             ),
-            SizedBox(height: 40.h),
+            SizedBox(height: 30.h),
             Text(
               currentSong,
               textAlign: TextAlign.center,
@@ -95,25 +96,32 @@ class _NowPlayingScreenState extends State<PlayScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w400),
             ),
-            SizedBox(height: 40.h),
-            Slider(
-              value: progress,
-              onChanged: (value) {},
-              activeColor: Colors.redAccent,
-            ),
+            SizedBox(height: 20.h),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                Text("0:39", style: TextStyle(color: Colors.grey)),
-                Text("2:46", style: TextStyle(color: Colors.grey)),
+              children: [
+                const Text("15:39", style: TextStyle(color: Colors.grey)),
+                Expanded(
+                  child: Slider(
+                    value: progress,
+                    min: 0.0,
+                    max: totalDuration,
+                    onChanged: (value) {
+                      setState(() {
+                        progress = value;
+                      });
+                    },
+                    activeColor: Colors.redAccent,
+                  ),
+                ),
+                const Text("0:46", style: TextStyle(color: Colors.grey)),
               ],
             ),
-            const SizedBox(height: 40),
+            SizedBox(height: 20.h),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 IconButton(
-                  icon: Icon(Icons.skip_previous, size: 35.h),
+                  icon: Icon(Icons.skip_previous, size: 35.w),
                   onPressed: playPrevious,
                 ),
                 IconButton(
@@ -122,7 +130,7 @@ class _NowPlayingScreenState extends State<PlayScreen> {
                         ? Icons.pause_circle_filled
                         : Icons.play_circle_fill,
                     color: Colors.redAccent,
-                    size: 60.h,
+                    size: 60.w,
                   ),
                   onPressed: () {
                     setState(() {
@@ -131,7 +139,7 @@ class _NowPlayingScreenState extends State<PlayScreen> {
                   },
                 ),
                 IconButton(
-                  icon: Icon(Icons.skip_next, size: 35.h),
+                  icon: Icon(Icons.skip_next, size: 35.w),
                   onPressed: playNext,
                 ),
               ],

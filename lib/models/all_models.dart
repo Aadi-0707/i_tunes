@@ -1,16 +1,36 @@
+class SongModel {
+  final String title;
+  final String artist;
+  final String imageUrl;
+
+  SongModel({
+    required this.title,
+    required this.artist,
+    required this.imageUrl,
+  });
+
+  factory SongModel.fromJson(Map<String, dynamic> json) {
+    return SongModel(
+      title: json['im:name']['label'],
+      artist: json['im:artist']['label'],
+      imageUrl: json['im:image'][2]['label'],
+    );
+  }
+}
+
 // class MusicModel {
 //   Feed? feed;
 
 //   MusicModel({this.feed});
 
 //   MusicModel.fromJson(Map<String, dynamic> json) {
-//     feed = json['feed'] != null ? new Feed.fromJson(json['feed']) : null;
+//     feed = json['feed'] != null ? Feed.fromJson(json['feed']) : null;
 //   }
 
 //   Map<String, dynamic> toJson() {
-//     final Map<String, dynamic> data = new Map<String, dynamic>();
-//     if (this.feed != null) {
-//       data['feed'] = this.feed!.toJson();
+//     final Map<String, dynamic> data = {};
+//     if (feed != null) {
+//       data['feed'] = feed!.toJson();
 //     }
 //     return data;
 //   }
@@ -38,52 +58,52 @@
 
 //   Feed.fromJson(Map<String, dynamic> json) {
 //     author =
-//         json['author'] != null ? new Author.fromJson(json['author']) : null;
+//         json['author'] != null ? Author.fromJson(json['author']) : null;
 //     if (json['entry'] != null) {
 //       entry = <Entry>[];
 //       json['entry'].forEach((v) {
-//         entry!.add(new Entry.fromJson(v));
+//         entry!.add(Entry.fromJson(v));
 //       });
 //     }
 //     updated =
-//         json['updated'] != null ? new Name.fromJson(json['updated']) : null;
-//     rights = json['rights'] != null ? new Name.fromJson(json['rights']) : null;
-//     title = json['title'] != null ? new Name.fromJson(json['title']) : null;
-//     icon = json['icon'] != null ? new Name.fromJson(json['icon']) : null;
+//         json['updated'] != null ? Name.fromJson(json['updated']) : null;
+//     rights = json['rights'] != null ? Name.fromJson(json['rights']) : null;
+//     title = json['title'] != null ? Name.fromJson(json['title']) : null;
+//     icon = json['icon'] != null ? Name.fromJson(json['icon']) : null;
 //     if (json['link'] != null) {
 //       link = <Link>[];
 //       json['link'].forEach((v) {
-//         link!.add(new Link.fromJson(v));
+//         link!.add(Link.fromJson(v));
 //       });
 //     }
-//     id = json['id'] != null ? new Name.fromJson(json['id']) : null;
+//     id = json['id'] != null ? Name.fromJson(json['id']) : null;
 //   }
 
 //   Map<String, dynamic> toJson() {
-//     final Map<String, dynamic> data = new Map<String, dynamic>();
-//     if (this.author != null) {
-//       data['author'] = this.author!.toJson();
+//     final Map<String, dynamic> data = {};
+//     if (author != null) {
+//       data['author'] = author!.toJson();
 //     }
-//     if (this.entry != null) {
-//       data['entry'] = this.entry!.map((v) => v.toJson()).toList();
+//     if (entry != null) {
+//       data['entry'] = entry!.map((v) => v.toJson()).toList();
 //     }
-//     if (this.updated != null) {
-//       data['updated'] = this.updated!.toJson();
+//     if (updated != null) {
+//       data['updated'] = updated!.toJson();
 //     }
-//     if (this.rights != null) {
-//       data['rights'] = this.rights!.toJson();
+//     if (rights != null) {
+//       data['rights'] = rights!.toJson();
 //     }
-//     if (this.title != null) {
-//       data['title'] = this.title!.toJson();
+//     if (title != null) {
+//       data['title'] = title!.toJson();
 //     }
-//     if (this.icon != null) {
-//       data['icon'] = this.icon!.toJson();
+//     if (icon != null) {
+//       data['icon'] = icon!.toJson();
 //     }
-//     if (this.link != null) {
-//       data['link'] = this.link!.map((v) => v.toJson()).toList();
+//     if (link != null) {
+//       data['link'] = link!.map((v) => v.toJson()).toList();
 //     }
-//     if (this.id != null) {
-//       data['id'] = this.id!.toJson();
+//     if (id != null) {
+//       data['id'] = id!.toJson();
 //     }
 //     return data;
 //   }
@@ -96,17 +116,17 @@
 //   Author({this.name, this.uri});
 
 //   Author.fromJson(Map<String, dynamic> json) {
-//     name = json['name'] != null ? new Name.fromJson(json['name']) : null;
-//     uri = json['uri'] != null ? new Name.fromJson(json['uri']) : null;
+//     name = json['name'] != null ? Name.fromJson(json['name']) : null;
+//     uri = json['uri'] != null ? Name.fromJson(json['uri']) : null;
 //   }
 
 //   Map<String, dynamic> toJson() {
-//     final Map<String, dynamic> data = new Map<String, dynamic>();
-//     if (this.name != null) {
-//       data['name'] = this.name!.toJson();
+//     final Map<String, dynamic> data = {};
+//     if (name != null) {
+//       data['name'] = name!.toJson();
 //     }
-//     if (this.uri != null) {
-//       data['uri'] = this.uri!.toJson();
+//     if (uri != null) {
+//       data['uri'] = uri!.toJson();
 //     }
 //     return data;
 //   }
@@ -122,8 +142,8 @@
 //   }
 
 //   Map<String, dynamic> toJson() {
-//     final Map<String, dynamic> data = new Map<String, dynamic>();
-//     data['label'] = this.label;
+//     final Map<String, dynamic> data = {};
+//     data['label'] = label;
 //     return data;
 //   }
 // }
@@ -158,78 +178,78 @@
 
 //   Entry.fromJson(Map<String, dynamic> json) {
 //     imName =
-//         json['im:name'] != null ? new Name.fromJson(json['im:name']) : null;
+//         json['im:name'] != null ? Name.fromJson(json['im:name']) : null;
 //     if (json['im:image'] != null) {
 //       imImage = <ImImage>[];
 //       json['im:image'].forEach((v) {
-//         imImage!.add(new ImImage.fromJson(v));
+//         imImage!.add(ImImage.fromJson(v));
 //       });
 //     }
 //     imCollection = json['im:collection'] != null
-//         ? new ImCollection.fromJson(json['im:collection'])
+//         ? ImCollection.fromJson(json['im:collection'])
 //         : null;
 //     imPrice = json['im:price'] != null
-//         ? new ImImage.fromJson(json['im:price'])
+//         ? ImImage.fromJson(json['im:price'])
 //         : null;
 //     imContentType = json['im:contentType'] != null
-//         ? new Link.fromJson(json['im:contentType'])
+//         ? Link.fromJson(json['im:contentType'])
 //         : null;
-//     rights = json['rights'] != null ? new Name.fromJson(json['rights']) : null;
-//     title = json['title'] != null ? new Name.fromJson(json['title']) : null;
+//     rights = json['rights'] != null ? Name.fromJson(json['rights']) : null;
+//     title = json['title'] != null ? Name.fromJson(json['title']) : null;
 //     if (json['link'] != null) {
 //       link = <Link>[];
 //       json['link'].forEach((v) {
-//         link!.add(new Link.fromJson(v));
+//         link!.add(Link.fromJson(v));
 //       });
 //     }
-//     id = json['id'] != null ? new Name.fromJson(json['id']) : null;
+//     id = json['id'] != null ? Name.fromJson(json['id']) : null;
 //     imArtist = json['im:artist'] != null
-//         ? new ImImage.fromJson(json['im:artist'])
+//         ? ImImage.fromJson(json['im:artist'])
 //         : null;
 //     category =
-//         json['category'] != null ? new Link.fromJson(json['category']) : null;
+//         json['category'] != null ? Link.fromJson(json['category']) : null;
 //     imReleaseDate = json['im:releaseDate'] != null
-//         ? new ImImage.fromJson(json['im:releaseDate'])
+//         ? ImImage.fromJson(json['im:releaseDate'])
 //         : null;
 //   }
 
 //   Map<String, dynamic> toJson() {
-//     final Map<String, dynamic> data = new Map<String, dynamic>();
-//     if (this.imName != null) {
-//       data['im:name'] = this.imName!.toJson();
+//     final Map<String, dynamic> data = {};
+//     if (imName != null) {
+//       data['im:name'] = imName!.toJson();
 //     }
-//     if (this.imImage != null) {
-//       data['im:image'] = this.imImage!.map((v) => v.toJson()).toList();
+//     if (imImage != null) {
+//       data['im:image'] = imImage!.map((v) => v.toJson()).toList();
 //     }
-//     if (this.imCollection != null) {
-//       data['im:collection'] = this.imCollection!.toJson();
+//     if (imCollection != null) {
+//       data['im:collection'] = imCollection!.toJson();
 //     }
-//     if (this.imPrice != null) {
-//       data['im:price'] = this.imPrice!.toJson();
+//     if (imPrice != null) {
+//       data['im:price'] = imPrice!.toJson();
 //     }
-//     if (this.imContentType != null) {
-//       data['im:contentType'] = this.imContentType!.toJson();
+//     if (imContentType != null) {
+//       data['im:contentType'] = imContentType!.toJson();
 //     }
-//     if (this.rights != null) {
-//       data['rights'] = this.rights!.toJson();
+//     if (rights != null) {
+//       data['rights'] = rights!.toJson();
 //     }
-//     if (this.title != null) {
-//       data['title'] = this.title!.toJson();
+//     if (title != null) {
+//       data['title'] = title!.toJson();
 //     }
-//     if (this.link != null) {
-//       data['link'] = this.link!.map((v) => v.toJson()).toList();
+//     if (link != null) {
+//       data['link'] = link!.map((v) => v.toJson()).toList();
 //     }
-//     if (this.id != null) {
-//       data['id'] = this.id!.toJson();
+//     if (id != null) {
+//       data['id'] = id!.toJson();
 //     }
-//     if (this.imArtist != null) {
-//       data['im:artist'] = this.imArtist!.toJson();
+//     if (imArtist != null) {
+//       data['im:artist'] = imArtist!.toJson();
 //     }
-//     if (this.category != null) {
-//       data['category'] = this.category!.toJson();
+//     if (category != null) {
+//       data['category'] = category!.toJson();
 //     }
-//     if (this.imReleaseDate != null) {
-//       data['im:releaseDate'] = this.imReleaseDate!.toJson();
+//     if (imReleaseDate != null) {
+//       data['im:releaseDate'] = imReleaseDate!.toJson();
 //     }
 //     return data;
 //   }
@@ -237,22 +257,22 @@
 
 // class ImImage {
 //   String? label;
-//   Attributes? attributes;
+//   IdAttributes? attributes;
 
 //   ImImage({this.label, this.attributes});
 
 //   ImImage.fromJson(Map<String, dynamic> json) {
 //     label = json['label'];
 //     attributes = json['attributes'] != null
-//         ? new Attributes.fromJson(json['attributes'])
+//         ? IdAttributes.fromJson(json['attributes'])
 //         : null;
 //   }
 
 //   Map<String, dynamic> toJson() {
-//     final Map<String, dynamic> data = new Map<String, dynamic>();
-//     data['label'] = this.label;
-//     if (this.attributes != null) {
-//       data['attributes'] = this.attributes!.toJson();
+//     final Map<String, dynamic> data = {};
+//     data['label'] = label;
+//     if (attributes != null) {
+//       data['attributes'] = attributes!.toJson();
 //     }
 //     return data;
 //   }
@@ -268,8 +288,8 @@
 //   }
 
 //   Map<String, dynamic> toJson() {
-//     final Map<String, dynamic> data = new Map<String, dynamic>();
-//     data['height'] = this.height;
+//     final Map<String, dynamic> data = {};
+//     data['height'] = height;
 //     return data;
 //   }
 // }
@@ -283,43 +303,43 @@
 
 //   ImCollection.fromJson(Map<String, dynamic> json) {
 //     imName =
-//         json['im:name'] != null ? new Name.fromJson(json['im:name']) : null;
-//     link = json['link'] != null ? new Link.fromJson(json['link']) : null;
+//         json['im:name'] != null ? Name.fromJson(json['im:name']) : null;
+//     link = json['link'] != null ? Link.fromJson(json['link']) : null;
 //     imContentType = json['im:contentType'] != null
-//         ? new Link.fromJson(json['im:contentType'])
+//         ? Link.fromJson(json['im:contentType'])
 //         : null;
 //   }
 
 //   Map<String, dynamic> toJson() {
-//     final Map<String, dynamic> data = new Map<String, dynamic>();
-//     if (this.imName != null) {
-//       data['im:name'] = this.imName!.toJson();
+//     final Map<String, dynamic> data = {};
+//     if (imName != null) {
+//       data['im:name'] = imName!.toJson();
 //     }
-//     if (this.link != null) {
-//       data['link'] = this.link!.toJson();
+//     if (link != null) {
+//       data['link'] = link!.toJson();
 //     }
-//     if (this.imContentType != null) {
-//       data['im:contentType'] = this.imContentType!.toJson();
+//     if (imContentType != null) {
+//       data['im:contentType'] = imContentType!.toJson();
 //     }
 //     return data;
 //   }
 // }
 
 // class Link {
-//   Attributes? attributes;
+//   IdAttributes? attributes;
 
 //   Link({this.attributes});
 
 //   Link.fromJson(Map<String, dynamic> json) {
 //     attributes = json['attributes'] != null
-//         ? new Attributes.fromJson(json['attributes'])
+//         ? IdAttributes.fromJson(json['attributes'])
 //         : null;
 //   }
 
 //   Map<String, dynamic> toJson() {
-//     final Map<String, dynamic> data = new Map<String, dynamic>();
-//     if (this.attributes != null) {
-//       data['attributes'] = this.attributes!.toJson();
+//     final Map<String, dynamic> data = {};
+//     if (attributes != null) {
+//       data['attributes'] = attributes!.toJson();
 //     }
 //     return data;
 //   }
@@ -339,36 +359,36 @@
 //   }
 
 //   Map<String, dynamic> toJson() {
-//     final Map<String, dynamic> data = new Map<String, dynamic>();
-//     data['rel'] = this.rel;
-//     data['type'] = this.type;
-//     data['href'] = this.href;
+//     final Map<String, dynamic> data = {};
+//     data['rel'] = rel;
+//     data['type'] = type;
+//     data['href'] = href;
 //     return data;
 //   }
 // }
 
 // class ImContentType {
 //   Link? imContentType;
-//   Attributes? attributes;
+//   IdAttributes? attributes;
 
 //   ImContentType({this.imContentType, this.attributes});
 
 //   ImContentType.fromJson(Map<String, dynamic> json) {
 //     imContentType = json['im:contentType'] != null
-//         ? new Link.fromJson(json['im:contentType'])
+//         ? Link.fromJson(json['im:contentType'])
 //         : null;
 //     attributes = json['attributes'] != null
-//         ? new Attributes.fromJson(json['attributes'])
+//         ? IdAttributes.fromJson(json['attributes'])
 //         : null;
 //   }
 
 //   Map<String, dynamic> toJson() {
-//     final Map<String, dynamic> data = new Map<String, dynamic>();
-//     if (this.imContentType != null) {
-//       data['im:contentType'] = this.imContentType!.toJson();
+//     final Map<String, dynamic> data = {};
+//     if (imContentType != null) {
+//       data['im:contentType'] = imContentType!.toJson();
 //     }
-//     if (this.attributes != null) {
-//       data['attributes'] = this.attributes!.toJson();
+//     if (attributes != null) {
+//       data['attributes'] = attributes!.toJson();
 //     }
 //     return data;
 //   }
@@ -386,9 +406,9 @@
 //   }
 
 //   Map<String, dynamic> toJson() {
-//     final Map<String, dynamic> data = new Map<String, dynamic>();
-//     data['term'] = this.term;
-//     data['label'] = this.label;
+//     final Map<String, dynamic> data = {};
+//     data['term'] = term;
+//     data['label'] = label;
 //     return data;
 //   }
 // }
@@ -405,36 +425,9 @@
 //   }
 
 //   Map<String, dynamic> toJson() {
-//     final Map<String, dynamic> data = new Map<String, dynamic>();
-//     data['amount'] = this.amount;
-//     data['currency'] = this.currency;
-//     return data;
-//   }
-// }
-
-// class Link {
-//   Attributes? attributes;
-//   Name? imDuration;
-
-//   Link({this.attributes, this.imDuration});
-
-//   Link.fromJson(Map<String, dynamic> json) {
-//     attributes = json['attributes'] != null
-//         ? new Attributes.fromJson(json['attributes'])
-//         : null;
-//     imDuration = json['im:duration'] != null
-//         ? new Name.fromJson(json['im:duration'])
-//         : null;
-//   }
-
-//   Map<String, dynamic> toJson() {
-//     final Map<String, dynamic> data = new Map<String, dynamic>();
-//     if (this.attributes != null) {
-//       data['attributes'] = this.attributes!.toJson();
-//     }
-//     if (this.imDuration != null) {
-//       data['im:duration'] = this.imDuration!.toJson();
-//     }
+//     final Map<String, dynamic> data = {};
+//     data['amount'] = amount;
+//     data['currency'] = currency;
 //     return data;
 //   }
 // }
@@ -469,6 +462,36 @@
 
 // class IdAttributes {
 //   String? imId;
+// class AssetAttributes {
+//   String? rel;
+//   String? type;
+//   String? href;
+//   String? title;
+//   String? imAssetType;
+
+//   AssetAttributes({this.rel, this.type, this.href, this.title, this.imAssetType});
+
+//   AssetAttributes.fromJson(Map<String, dynamic> json) {
+//     rel = json['rel'];
+//     type = json['type'];
+//     href = json['href'];
+//     title = json['title'];
+//     imAssetType = json['im:assetType'];
+//   }
+
+//   Map<String, dynamic> toJson() {
+//     final Map<String, dynamic> data = {};
+//     data['rel'] = rel;
+//     data['type'] = type;
+//     data['href'] = href;
+//     data['title'] = title;
+//     data['im:assetType'] = imAssetType;
+//     return data;
+//   }
+// }
+//   }
+// class IdAttributes {
+//   String? imId;
 
 //   IdAttributes({this.imId});
 
@@ -477,12 +500,12 @@
 //   }
 
 //   Map<String, dynamic> toJson() {
-//     final Map<String, dynamic> data = new Map<String, dynamic>();
-//     data['im:id'] = this.imId;
+//     final Map<String, dynamic> data = {};
+//     data['im:id'] = imId;
 //     return data;
 //   }
 // }
-
+//   }
 // class HrefAttributes {
 //   String? href;
 
@@ -493,12 +516,11 @@
 //   }
 
 //   Map<String, dynamic> toJson() {
-//     final Map<String, dynamic> data = new Map<String, dynamic>();
-//     data['href'] = this.href;
+//     final Map<String, dynamic> data = {};
+//     data['href'] = href;
 //     return data;
 //   }
 // }
-
 // class CategoryAttributes {
 //   String? imId;
 //   String? term;
@@ -515,11 +537,11 @@
 //   }
 
 //   Map<String, dynamic> toJson() {
-//     final Map<String, dynamic> data = new Map<String, dynamic>();
-//     data['im:id'] = this.imId;
-//     data['term'] = this.term;
-//     data['scheme'] = this.scheme;
-//     data['label'] = this.label;
+//     final Map<String, dynamic> data = {};
+//     data['im:id'] = imId;
+//     data['term'] = term;
+//     data['scheme'] = scheme;
+//     data['label'] = label;
 //     return data;
 //   }
 // }

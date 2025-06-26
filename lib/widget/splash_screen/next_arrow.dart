@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class NextArrowButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -8,13 +9,13 @@ class NextArrowButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 32.0, right: 16.0),
+      padding: EdgeInsets.only(bottom: 32.0.w, right: 16.0.w),
       child: Align(
         alignment: Alignment.bottomRight,
         child: FloatingActionButton(
           onPressed: onPressed,
-          backgroundColor: Colors.red[200],
-          child: const Icon(Icons.arrow_forward, color: Colors.black, size: 32),
+          backgroundColor: Colors.red[500],
+          child: Icon(Icons.arrow_forward, color: Colors.white, size: 32.w),
         ),
       ),
     );

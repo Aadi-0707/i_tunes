@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:i_tunes/view/home_screen.dart';
 import 'package:i_tunes/widget/splash_screen/dot.dart';
 import 'package:i_tunes/widget/splash_screen/next_arrow.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
@@ -14,14 +15,14 @@ class SplashScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset('assets/images/logo.png', width: 200, height: 200),
-            const SizedBox(height: 30),
-            const Text(
+            Image.asset('assets/images/logo.png', width: 200.w, height: 200.h),
+            SizedBox(height: 30.h),
+            Text(
               'My Music App',
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
+              style: TextStyle(fontSize: 28.sp, fontWeight: FontWeight.w600),
             ),
-            const SizedBox(
-              height: 30,
+            SizedBox(
+              height: 30.h,
             ),
             Dot(activeIndex: activeIndex),
           ],
@@ -52,17 +53,17 @@ class SecondSplashScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset('assets/images/logo.png', width: 200, height: 200),
-            const SizedBox(height: 30),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.0),
+            Image.asset('assets/images/logo.png', width: 200.w, height: 200.h),
+            SizedBox(height: 30.h),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24.0.w),
               child: Text(
                 'Explore Millions of Tracks at Your Fingertips',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 26, fontWeight: FontWeight.w600),
+                style: TextStyle(fontSize: 26.sp, fontWeight: FontWeight.w600),
               ),
             ),
-            const SizedBox(height: 30),
+            SizedBox(height: 30.h),
             Dot(activeIndex: activeIndex),
           ],
         ),
@@ -92,13 +93,13 @@ class ThirdSplashScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset('assets/images/logo.png', width: 200, height: 200),
-            const SizedBox(height: 30),
-            const Text(
+            Image.asset('assets/images/logo.png', width: 200.w, height: 200.h),
+            SizedBox(height: 30.h),
+            Text(
               'Unleash the Power of Music',
-              style: TextStyle(fontSize: 26, fontWeight: FontWeight.w600),
+              style: TextStyle(fontSize: 26.sp, fontWeight: FontWeight.w600),
             ),
-            const SizedBox(height: 30),
+            SizedBox(height: 30.h),
             Dot(activeIndex: activeIndex),
           ],
         ),

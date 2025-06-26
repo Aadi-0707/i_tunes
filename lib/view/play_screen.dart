@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class PlayScreen extends StatefulWidget {
   final String songName;
@@ -54,23 +55,22 @@ class _NowPlayingScreenState extends State<PlayScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: const Text('Playing', style: TextStyle(color: Colors.black)),
+        title: Text('Playing', style: TextStyle(color: Colors.black)),
         leading: IconButton(
-          icon:
-              const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20),
+        padding: EdgeInsets.symmetric(horizontal: 24.0.w, vertical: 20.h),
         child: Column(
           children: [
-            const SizedBox(height: 40),
+            SizedBox(height: 40.h),
             Container(
-              height: 400,
-              width: 300,
+              height: 400.h,
+              width: 300.w,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(20.r),
                 image: const DecorationImage(
                   image: AssetImage('assets/images/singer_pic.jpg'),
                   fit: BoxFit.cover,
@@ -78,24 +78,24 @@ class _NowPlayingScreenState extends State<PlayScreen> {
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.9),
-                    blurRadius: 20,
+                    blurRadius: 20.r,
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 40),
+            SizedBox(height: 40.h),
             Text(
               currentSong,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4.h),
             Text(
               'Artist Name',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w400),
             ),
-            const SizedBox(height: 40),
+            SizedBox(height: 40.h),
             Slider(
               value: progress,
               onChanged: (value) {},
@@ -113,7 +113,7 @@ class _NowPlayingScreenState extends State<PlayScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.skip_previous, size: 35),
+                  icon: Icon(Icons.skip_previous, size: 35.h),
                   onPressed: playPrevious,
                 ),
                 IconButton(
@@ -122,7 +122,7 @@ class _NowPlayingScreenState extends State<PlayScreen> {
                         ? Icons.pause_circle_filled
                         : Icons.play_circle_fill,
                     color: Colors.redAccent,
-                    size: 60,
+                    size: 60.h,
                   ),
                   onPressed: () {
                     setState(() {
@@ -131,7 +131,7 @@ class _NowPlayingScreenState extends State<PlayScreen> {
                   },
                 ),
                 IconButton(
-                  icon: const Icon(Icons.skip_next, size: 35),
+                  icon: Icon(Icons.skip_next, size: 35.h),
                   onPressed: playNext,
                 ),
               ],

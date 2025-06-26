@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class Dot extends StatelessWidget {
   final int activeIndex;
@@ -12,10 +13,10 @@ class Dot extends StatelessWidget {
       children: List.generate(3, (index) {
         bool isActive = index == activeIndex;
         return AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          margin: const EdgeInsets.symmetric(horizontal: 6),
-          width: 12,
-          height: 12,
+          duration: Duration(milliseconds: 300),
+          margin: EdgeInsets.symmetric(horizontal: 6.w),
+          width: 12.w,
+          height: 12.h,
           decoration: BoxDecoration(
             color: isActive ? Colors.red : Colors.grey,
             shape: BoxShape.circle,

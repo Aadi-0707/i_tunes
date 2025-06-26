@@ -24,6 +24,14 @@ class _HomeScreenState extends State<HomeScreen> {
     'Kesariya - Brahmastra'
   ];
 
+  String? selectedSong;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedSong = songs[0];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ? const Center(child: CircularProgressIndicator())
             : Column(
                 children: [
-                  if (songs.isNotEmpty) _buildFirstCard(songs[0]),
+                  if (selectedSong != null) _buildFirstCard(selectedSong!),
                   SizedBox(height: 20.h),
                   Text('TOP 20 Songs',
                       style: TextStyle(
@@ -168,6 +176,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: TextStyle(color: Colors.white70)),
                 trailing: const Icon(Icons.play_arrow, color: Colors.white),
                 onTap: () {
+                  setState(() {
+                    selectedSong = songs;
+                  });
                   Navigator.push(
                     context,
                     MaterialPageRoute(

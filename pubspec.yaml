@@ -36,7 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_launcher_icons: ^0.14.4
   flutter_screenutil: ^5.9.0
-  dio: ^5.8.0+1
+  dio:
 
 flutter_launcher_icons:
   android: true

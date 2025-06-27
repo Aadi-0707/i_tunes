@@ -1,6 +1,8 @@
 import 'dart:ui';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:i_tunes/models/all_models.dart';
 import 'package:i_tunes/view/play_screen.dart';
 import 'package:marquee/marquee.dart';
 
@@ -12,24 +14,34 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool isLoading = false;
-
-  List<String> songs = [
-    'Tere Liye - Veer Zaara',
-    'Kal Ho Naa Ho - Kal Ho Naa Ho',
-    'Tum Hi Ho - Aashiqui 2',
-    'Chaiyya Chaiyya - Dil Se',
-    'Raabta - Agent Vinod',
-    'Bekhayali - Kabir Singh',
-    'Kesariya - Brahmastra'
-  ];
-
-  String? selectedSong;
+  bool isLoading = true;
+  List<SongModel> songs = [];
+  SongModel? selectedSong;
 
   @override
   void initState() {
     super.initState();
-    selectedSong = songs[0];
+    fetchSongs();
+  }
+
+  Future<void> fetchSongs() async {
+    try {
+      final response = await Dio().get(
+          'http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topsongs/limit=20/json');
+      final entries = response.data['feed']['entry'] as List;
+
+      songs = entries.map((json) => SongModel.fromJson(json)).toList();
+
+      setState(() {
+        selectedSong = songs.first;
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Error fetching songs: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -64,7 +76,9 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildFirstCard(String song) {
+  Widget _buildFirstCard(SongModel song) {
+    int songIndex = songs.indexOf(song);
+
     return Stack(
       children: [
         Container(
@@ -93,8 +107,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           width: 100,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(90.r),
-                            image: const DecorationImage(
-                              image: AssetImage('assets/images/singer_pic.jpg'),
+                            image: DecorationImage(
+                              image: NetworkImage(song.imageUrl),
                               fit: BoxFit.cover,
                             ),
                             boxShadow: [
@@ -113,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         title: SizedBox(
                           height: 25.h,
                           child: Marquee(
-                            text: song,
+                            text: song.title,
                             style: TextStyle(
                               fontSize: 22.sp,
                               fontWeight: FontWeight.bold,
@@ -125,8 +139,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             startPadding: 10.0,
                           ),
                         ),
-                        subtitle: const Text('Artist Name',
-                            style: TextStyle(color: Colors.white70)),
+                        subtitle: Text(song.artist,
+                            style: const TextStyle(color: Colors.white70)),
                       ),
                     ),
                     IconButton(
@@ -136,7 +150,16 @@ class _HomeScreenState extends State<HomeScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => PlayScreen(songName: song),
+                            builder: (context) => PlayScreen(
+                              songs: songs
+                                  .map((song) => {
+                                        'title': song.title,
+                                        'artist': song.artist,
+                                        'imageUrl': song.imageUrl,
+                                      })
+                                  .toList(),
+                              initialIndex: songIndex,
+                            ),
                           ),
                         );
                       },
@@ -151,7 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildSecondCard(String songs, int index) {
+  Widget _buildSecondCard(SongModel song, int index) {
     return Stack(
       children: [
         Container(
@@ -168,21 +191,31 @@ class _HomeScreenState extends State<HomeScreen> {
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
               child: ListTile(
-                leading: const CircleAvatar(
-                  backgroundImage: AssetImage('assets/images/singer_pic.jpg'),
+                leading: CircleAvatar(
+                  backgroundImage: NetworkImage(song.imageUrl),
                 ),
-                title: Text(songs, style: const TextStyle(color: Colors.white)),
-                subtitle: const Text('Artist Name',
-                    style: TextStyle(color: Colors.white70)),
+                title: Text(song.title,
+                    style: const TextStyle(color: Colors.white)),
+                subtitle: Text(song.artist,
+                    style: const TextStyle(color: Colors.white70)),
                 trailing: const Icon(Icons.play_arrow, color: Colors.white),
                 onTap: () {
                   setState(() {
-                    selectedSong = songs;
+                    selectedSong = song;
                   });
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => PlayScreen(songName: songs),
+                      builder: (context) => PlayScreen(
+                        songs: songs
+                            .map((song) => {
+                                  'title': song.title,
+                                  'artist': song.artist,
+                                  'imageUrl': song.imageUrl,
+                                })
+                            .toList(),
+                        initialIndex: index,
+                      ),
                     ),
                   );
                 },

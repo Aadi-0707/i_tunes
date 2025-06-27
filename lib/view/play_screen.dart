@@ -2,63 +2,57 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class PlayScreen extends StatefulWidget {
-  final String songName;
+  final List<Map<String, String>> songs;
+  final int initialIndex;
 
-  const PlayScreen({super.key, required this.songName});
+  const PlayScreen({
+    super.key,
+    required this.songs,
+    required this.initialIndex,
+  });
 
   @override
-  State<PlayScreen> createState() => _NowPlayingScreenState();
+  State<PlayScreen> createState() => _PlayScreenState();
 }
 
-class _NowPlayingScreenState extends State<PlayScreen> {
+class _PlayScreenState extends State<PlayScreen> {
+  late int currentSongIndex;
   double progress = 15.0;
-  int currentSongIndex = 0;
   bool isPlaying = false;
   double totalDuration = 166.0;
-
-  List<String> hindiSongs = [
-    'Tere Liye - Veer Zaara',
-    'Kal Ho Naa Ho - Kal Ho Naa Ho',
-    'Tum Hi Ho - Aashiqui 2',
-    'Chaiyya Chaiyya - Dil Se',
-    'Raabta - Agent Vinod',
-    'Bekhayali - Kabir Singh',
-    'Kesariya - Brahmastra'
-  ];
 
   @override
   void initState() {
     super.initState();
-    currentSongIndex = hindiSongs.indexOf(widget.songName);
-    if (currentSongIndex == -1) {
-      currentSongIndex = 0;
-    }
+    currentSongIndex = widget.initialIndex;
   }
 
   void playNext() {
     setState(() {
-      currentSongIndex = (currentSongIndex + 1) % hindiSongs.length;
+      currentSongIndex = (currentSongIndex + 1) % widget.songs.length;
     });
   }
 
   void playPrevious() {
     setState(() {
       currentSongIndex =
-          (currentSongIndex - 1 + hindiSongs.length) % hindiSongs.length;
+          (currentSongIndex - 1 + widget.songs.length) % widget.songs.length;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    String currentSong = hindiSongs[currentSongIndex];
+    final currentSong = widget.songs[currentSongIndex];
+
     return Scaffold(
       backgroundColor: Colors.redAccent[50],
       appBar: AppBar(
         backgroundColor: Colors.redAccent[50],
         elevation: 0,
-        title: Text('Playing', style: TextStyle(color: Colors.black)),
+        title: const Text('Playing', style: TextStyle(color: Colors.black)),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
+          icon:
+              const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -72,8 +66,8 @@ class _NowPlayingScreenState extends State<PlayScreen> {
               width: 300.w,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20.r),
-                image: const DecorationImage(
-                  image: AssetImage('assets/images/singer_pic.jpg'),
+                image: DecorationImage(
+                  image: NetworkImage(currentSong['imageUrl'] ?? ''),
                   fit: BoxFit.cover,
                 ),
                 boxShadow: [
@@ -86,13 +80,13 @@ class _NowPlayingScreenState extends State<PlayScreen> {
             ),
             SizedBox(height: 30.h),
             Text(
-              currentSong,
+              currentSong['title'] ?? '',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 4.h),
             Text(
-              'Artist Name',
+              currentSong['artist'] ?? '',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w400),
             ),

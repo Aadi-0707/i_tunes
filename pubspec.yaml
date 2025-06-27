@@ -38,8 +38,7 @@ dependencies:
   flutter_screenutil: ^5.9.0
   dio: ^5.8.0+1
   marquee: ^2.2.3
-  just_audio: ^0.10.4
-  just_audio_background: ^0.0.1-beta.17
+
 
 
 flutter_launcher_icons:

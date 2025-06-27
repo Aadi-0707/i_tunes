@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ui';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,16 @@ class _HomeScreenState extends State<HomeScreen> {
   List<SongModel> songs = [];
   SongModel? selectedSong;
 
+  // List<String> songs = [
+  //   'Tere Liye - Veer Zaara',
+  //   'Kal Ho Naa Ho - Kal Ho Naa Ho',
+  //   'Tum Hi Ho - Aashiqui 2',
+  //   'Chaiyya Chaiyya - Dil Se',
+  //   'Raabta - Agent Vinod',
+  //   'Bekhayali - Kabir Singh',
+  //   'Kesariya - Brahmastra'
+  // ];
+
   @override
   void initState() {
     super.initState();
@@ -27,17 +38,28 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> fetchSongs() async {
     try {
       final response = await Dio().get(
-          'http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topsongs/limit=20/json');
-      final entries = response.data['feed']['entry'] as List;
+        'http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topsongs/limit=20/json',
+      );
 
-      songs = entries.map((json) => SongModel.fromJson(json)).toList();
+      if (response.statusCode == 200) {
+        final data =
+            response.data is String ? jsonDecode(response.data) : response.data;
 
-      setState(() {
-        selectedSong = songs.first;
-        isLoading = false;
-      });
+        final List<dynamic> entries = data['feed']['entry'];
+
+        songs = entries.map((json) => SongModel.fromJson(json)).toList();
+
+        print('Songs length: ${songs.length}');
+
+        setState(() {
+          selectedSong = songs.first;
+        });
+      } else {
+        print('API error ${response.statusCode}');
+      }
     } catch (e) {
       print('Error fetching songs: $e');
+    } finally {
       setState(() {
         isLoading = false;
       });
@@ -48,6 +70,114 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.redAccent[50],
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                image: const DecorationImage(
+                  image: AssetImage('assets/images/music_bg.png'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: ListTile(
+                title: Text(
+                  'iTunes',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 28.sp,
+                      color: Colors.white),
+                ),
+                subtitle: Text(
+                  'Menu',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22.sp,
+                      color: Colors.white),
+                ),
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+              decoration: BoxDecoration(
+                image: const DecorationImage(
+                  image: AssetImage('assets/images/music_bg.png'),
+                  fit: BoxFit.cover,
+                ),
+                borderRadius: BorderRadius.circular(8.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.redAccent.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ListTile(
+                leading: Icon(Icons.music_note, color: Colors.white),
+                title: Text(
+                  'Home',
+                  style: TextStyle(color: Colors.white),
+                ),
+                onTap: () {},
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+              decoration: BoxDecoration(
+                image: const DecorationImage(
+                  image: AssetImage('assets/images/music_bg.png'),
+                  fit: BoxFit.cover,
+                ),
+                borderRadius: BorderRadius.circular(8.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.redAccent.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ListTile(
+                leading: Icon(Icons.queue_music, color: Colors.white),
+                title: Text(
+                  'Playlist',
+                  style: TextStyle(color: Colors.white),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+              decoration: BoxDecoration(
+                image: const DecorationImage(
+                  image: AssetImage('assets/images/music_bg.png'),
+                  fit: BoxFit.cover,
+                ),
+                borderRadius: BorderRadius.circular(8.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.redAccent.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ListTile(
+                leading: Icon(Icons.feedback, color: Colors.white),
+                title: Text(
+                  'Feedback',
+                  style: TextStyle(color: Colors.white),
+                ),
+                onTap: () {},
+              ),
+            ),
+          ],
+        ),
+      ),
       body: Padding(
         padding: EdgeInsets.only(top: 60.w),
         child: isLoading

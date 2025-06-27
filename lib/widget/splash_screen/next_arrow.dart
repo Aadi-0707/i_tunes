@@ -12,10 +12,21 @@ class NextArrowButton extends StatelessWidget {
       padding: EdgeInsets.only(bottom: 32.0.w, right: 16.0.w),
       child: Align(
         alignment: Alignment.bottomRight,
-        child: FloatingActionButton(
-          onPressed: onPressed,
-          backgroundColor: Colors.red[500],
-          child: Icon(Icons.arrow_forward, color: Colors.white, size: 32.w),
+        child: GestureDetector(
+          onTap: onPressed,
+          child: Container(
+            width: 60.w,
+            height: 60.w,
+            decoration: BoxDecoration(
+              shape: BoxShape.rectangle,
+              image: DecorationImage(
+                image: AssetImage('assets/images/music_bg.png'),
+                fit: BoxFit.cover,
+              ),
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            child: Icon(Icons.arrow_forward, color: Colors.white, size: 32.w),
+          ),
         ),
       ),
     );

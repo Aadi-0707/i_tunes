@@ -24,6 +24,7 @@ class _PlayScreenState extends State<PlayScreen> {
   @override
   void initState() {
     super.initState();
+
     currentSongIndex = widget.initialIndex;
   }
 

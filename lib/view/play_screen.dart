@@ -1,5 +1,8 @@
+import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 
 class PlayScreen extends StatefulWidget {
   final List<Map<String, String>> songs;
@@ -17,21 +20,73 @@ class PlayScreen extends StatefulWidget {
 
 class _PlayScreenState extends State<PlayScreen> {
   late int currentSongIndex;
-  double progress = 15.0;
+  late AudioPlayer _audioPlayer;
+  double progress = 0.0;
   bool isPlaying = false;
-  double totalDuration = 166.0;
+  Duration totalDuration = Duration.zero;
 
   @override
   void initState() {
     super.initState();
-
     currentSongIndex = widget.initialIndex;
+    _audioPlayer = AudioPlayer();
+    _configureAudio();
+    _setAudio();
+  }
+
+  void _configureAudio() async {
+    // For proper background & audio session management
+    final session = await AudioSession.instance;
+    await session.configure(AudioSessionConfiguration.music());
+
+    _audioPlayer.durationStream.listen((duration) {
+      if (duration != null) {
+        setState(() {
+          totalDuration = duration;
+        });
+      }
+    });
+
+    _audioPlayer.positionStream.listen((position) {
+      setState(() {
+        progress = position.inSeconds.toDouble();
+      });
+    });
+
+    _audioPlayer.playerStateStream.listen((state) {
+      setState(() {
+        isPlaying = state.playing;
+      });
+    });
+  }
+
+  void _setAudio() async {
+    final currentSong = widget.songs[currentSongIndex];
+    final audioUrl = currentSong['audioUrl'] ?? '';
+
+    try {
+      await _audioPlayer.setAudioSource(
+        AudioSource.uri(
+          Uri.parse(audioUrl),
+          tag: MediaItem(
+            id: audioUrl,
+            album: currentSong['artist'] ?? '',
+            title: currentSong['title'] ?? '',
+            artUri: Uri.parse(currentSong['imageUrl'] ?? ''),
+          ),
+        ),
+      );
+      _audioPlayer.play();
+    } catch (e) {
+      print('Error loading audio: $e');
+    }
   }
 
   void playNext() {
     setState(() {
       currentSongIndex = (currentSongIndex + 1) % widget.songs.length;
     });
+    _setAudio();
   }
 
   void playPrevious() {
@@ -39,6 +94,13 @@ class _PlayScreenState extends State<PlayScreen> {
       currentSongIndex =
           (currentSongIndex - 1 + widget.songs.length) % widget.songs.length;
     });
+    _setAudio();
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
   }
 
   @override
@@ -54,7 +116,10 @@ class _PlayScreenState extends State<PlayScreen> {
         leading: IconButton(
           icon:
               const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            _audioPlayer.stop();
+            Navigator.pop(context);
+          },
         ),
       ),
       body: Padding(
@@ -94,21 +159,24 @@ class _PlayScreenState extends State<PlayScreen> {
             SizedBox(height: 20.h),
             Row(
               children: [
-                const Text("0:39", style: TextStyle(color: Colors.grey)),
+                Text(_formatTime(Duration(seconds: progress.toInt())),
+                    style: const TextStyle(color: Colors.grey)),
                 Expanded(
                   child: Slider(
                     value: progress,
                     min: 0.0,
-                    max: totalDuration,
+                    max: totalDuration.inSeconds.toDouble(),
                     onChanged: (value) {
                       setState(() {
                         progress = value;
                       });
+                      _audioPlayer.seek(Duration(seconds: value.toInt()));
                     },
                     activeColor: Colors.red,
                   ),
                 ),
-                const Text("3:46", style: TextStyle(color: Colors.grey)),
+                Text(_formatTime(totalDuration),
+                    style: const TextStyle(color: Colors.grey)),
               ],
             ),
             SizedBox(height: 20.h),
@@ -128,9 +196,11 @@ class _PlayScreenState extends State<PlayScreen> {
                     size: 60.w,
                   ),
                   onPressed: () {
-                    setState(() {
-                      isPlaying = !isPlaying;
-                    });
+                    if (isPlaying) {
+                      _audioPlayer.pause();
+                    } else {
+                      _audioPlayer.play();
+                    }
                   },
                 ),
                 IconButton(
@@ -143,5 +213,12 @@ class _PlayScreenState extends State<PlayScreen> {
         ),
       ),
     );
+  }
+
+  String _formatTime(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, "0");
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return "$minutes:$seconds";
   }
 }

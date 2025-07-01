@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:i_tunes/view/splash_screen.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await JustAudioBackground.init();
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {

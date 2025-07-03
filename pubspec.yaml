@@ -42,6 +42,7 @@ dependencies:
   path_provider: 
   just_audio_background: ^0.0.1-beta.17
   audio_session: ^0.2.2
+  audio_service: ^0.18.18
 
 flutter_launcher_icons:
   android: true

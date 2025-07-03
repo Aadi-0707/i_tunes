@@ -2,7 +2,6 @@ import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:just_audio_background/just_audio_background.dart';
 
 class PlayScreen extends StatefulWidget {
   final List<Map<String, String>> songs;
@@ -35,7 +34,6 @@ class _PlayScreenState extends State<PlayScreen> {
   }
 
   void _configureAudio() async {
-    // For proper background & audio session management
     final session = await AudioSession.instance;
     await session.configure(AudioSessionConfiguration.music());
 
@@ -65,17 +63,7 @@ class _PlayScreenState extends State<PlayScreen> {
     final audioUrl = currentSong['audioUrl'] ?? '';
 
     try {
-      await _audioPlayer.setAudioSource(
-        AudioSource.uri(
-          Uri.parse(audioUrl),
-          tag: MediaItem(
-            id: audioUrl,
-            album: currentSong['artist'] ?? '',
-            title: currentSong['title'] ?? '',
-            artUri: Uri.parse(currentSong['imageUrl'] ?? ''),
-          ),
-        ),
-      );
+      await _audioPlayer.setUrl(audioUrl);
       _audioPlayer.play();
     } catch (e) {
       print('Error loading audio: $e');
@@ -128,10 +116,10 @@ class _PlayScreenState extends State<PlayScreen> {
           children: [
             SizedBox(height: 30.h),
             Container(
-              height: 300.h,
-              width: 300.w,
+              height: 350,
+              width: 350,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20.r),
+                borderRadius: BorderRadius.circular(340.r),
                 image: DecorationImage(
                   image: NetworkImage(currentSong['imageUrl'] ?? ''),
                   fit: BoxFit.cover,
@@ -140,6 +128,7 @@ class _PlayScreenState extends State<PlayScreen> {
                   BoxShadow(
                     color: Colors.black.withOpacity(0.5),
                     blurRadius: 20.r,
+                    offset: Offset(0, 15.h),
                   ),
                 ],
               ),

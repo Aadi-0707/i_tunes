@@ -9,8 +9,6 @@ void main() async {
     androidNotificationChannelId: 'com.ryanheise.bg_demo.channel.audio',
     androidNotificationChannelName: 'Audio playback',
     androidNotificationOngoing: true,
-    androidNotificationIcon: 'drawable/ic_notification',
-    androidShowNotificationBadge: true,
   );
   runApp(const MyApp());
 }

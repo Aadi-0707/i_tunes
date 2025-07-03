@@ -2,6 +2,8 @@ import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
+import 'package:audio_service/audio_service.dart';
 
 class PlayScreen extends StatefulWidget {
   final List<Map<String, String>> songs;
@@ -61,12 +63,26 @@ class _PlayScreenState extends State<PlayScreen> {
   void _setAudio() async {
     final currentSong = widget.songs[currentSongIndex];
     final audioUrl = currentSong['audioUrl'] ?? '';
+    final title = currentSong['title'] ?? 'Unknown';
+    final artist = currentSong['artist'] ?? 'Unknown';
+    final imageUrl = currentSong['imageUrl'] ?? '';
 
     try {
-      await _audioPlayer.setUrl(audioUrl);
-      _audioPlayer.play();
+      await _audioPlayer.setAudioSource(
+        AudioSource.uri(
+          Uri.parse(audioUrl),
+          tag: MediaItem(
+            id: audioUrl,
+            title: title,
+            artist: artist,
+            artUri: Uri.parse(imageUrl),
+          ),
+        ),
+      );
+
+      await _audioPlayer.play();
     } catch (e) {
-      print('Error loading audio: $e');
+      debugPrint('Error loading audio: $e');
     }
   }
 
@@ -148,8 +164,10 @@ class _PlayScreenState extends State<PlayScreen> {
             SizedBox(height: 20.h),
             Row(
               children: [
-                Text(_formatTime(Duration(seconds: progress.toInt())),
-                    style: const TextStyle(color: Colors.grey)),
+                Text(
+                  _formatTime(Duration(seconds: progress.toInt())),
+                  style: const TextStyle(color: Colors.grey),
+                ),
                 Expanded(
                   child: Slider(
                     value: progress,
@@ -164,8 +182,10 @@ class _PlayScreenState extends State<PlayScreen> {
                     activeColor: Colors.red,
                   ),
                 ),
-                Text(_formatTime(totalDuration),
-                    style: const TextStyle(color: Colors.grey)),
+                Text(
+                  _formatTime(totalDuration),
+                  style: const TextStyle(color: Colors.grey),
+                ),
               ],
             ),
             SizedBox(height: 20.h),

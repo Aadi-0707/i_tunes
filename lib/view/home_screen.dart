@@ -19,16 +19,6 @@ class _HomeScreenState extends State<HomeScreen> {
   List<SongModel> songs = [];
   SongModel? selectedSong;
 
-  // List<String> songs = [
-  //   'Tere Liye - Veer Zaara',
-  //   'Kal Ho Naa Ho - Kal Ho Naa Ho',
-  //   'Tum Hi Ho - Aashiqui 2',
-  //   'Chaiyya Chaiyya - Dil Se',
-  //   'Raabta - Agent Vinod',
-  //   'Bekhayali - Kabir Singh',
-  //   'Kesariya - Brahmastra'
-  // ];
-
   @override
   void initState() {
     super.initState();
@@ -49,16 +39,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
         songs = entries.map((json) => SongModel.fromJson(json)).toList();
 
-        print('Songs length: ${songs.length}');
-
         setState(() {
           selectedSong = songs.first;
         });
       } else {
-        print('API error ${response.statusCode}');
+        throw Exception('Failed to load songs');
       }
     } catch (e) {
-      print('Error fetching songs: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error fetching songs: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     } finally {
       setState(() {
         isLoading = false;
@@ -70,114 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.redAccent[50],
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(
-                image: const DecorationImage(
-                  image: AssetImage('assets/images/music_bg.png'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              child: ListTile(
-                title: Text(
-                  'iTunes',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 28.sp,
-                      color: Colors.white),
-                ),
-                subtitle: Text(
-                  'Menu',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 22.sp,
-                      color: Colors.white),
-                ),
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
-              decoration: BoxDecoration(
-                image: const DecorationImage(
-                  image: AssetImage('assets/images/music_bg.png'),
-                  fit: BoxFit.cover,
-                ),
-                borderRadius: BorderRadius.circular(8.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.redAccent.withOpacity(0.2),
-                    blurRadius: 8,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: ListTile(
-                leading: Icon(Icons.music_note, color: Colors.white),
-                title: Text(
-                  'Home',
-                  style: TextStyle(color: Colors.white),
-                ),
-                onTap: () {},
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
-              decoration: BoxDecoration(
-                image: const DecorationImage(
-                  image: AssetImage('assets/images/music_bg.png'),
-                  fit: BoxFit.cover,
-                ),
-                borderRadius: BorderRadius.circular(8.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.redAccent.withOpacity(0.2),
-                    blurRadius: 8,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: ListTile(
-                leading: Icon(Icons.queue_music, color: Colors.white),
-                title: Text(
-                  'Playlist',
-                  style: TextStyle(color: Colors.white),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
-              decoration: BoxDecoration(
-                image: const DecorationImage(
-                  image: AssetImage('assets/images/music_bg.png'),
-                  fit: BoxFit.cover,
-                ),
-                borderRadius: BorderRadius.circular(8.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.redAccent.withOpacity(0.2),
-                    blurRadius: 8,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: ListTile(
-                leading: Icon(Icons.feedback, color: Colors.white),
-                title: Text(
-                  'Feedback',
-                  style: TextStyle(color: Colors.white),
-                ),
-                onTap: () {},
-              ),
-            ),
-          ],
-        ),
-      ),
+      drawer: _buildDrawer(),
       body: Padding(
         padding: EdgeInsets.only(top: 60.w),
         child: isLoading
@@ -202,6 +88,66 @@ class _HomeScreenState extends State<HomeScreen> {
                   )
                 ],
               ),
+      ),
+    );
+  }
+
+  Widget _buildDrawer() {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/music_bg.png'),
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: ListTile(
+              title: Text('iTunes',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 28.sp,
+                      color: Colors.white)),
+              subtitle: Text('Menu',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22.sp,
+                      color: Colors.white)),
+            ),
+          ),
+          _buildDrawerTile(Icons.music_note, 'Home', () {}),
+          _buildDrawerTile(Icons.queue_music, 'Playlist', () {
+            Navigator.pop(context);
+          }),
+          _buildDrawerTile(Icons.feedback, 'Feedback', () {}),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDrawerTile(IconData icon, String title, VoidCallback onTap) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+      decoration: BoxDecoration(
+        image: const DecorationImage(
+          image: AssetImage('assets/images/music_bg.png'),
+          fit: BoxFit.cover,
+        ),
+        borderRadius: BorderRadius.circular(8.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.redAccent.withOpacity(0.2),
+            blurRadius: 8,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ListTile(
+        leading: Icon(icon, color: Colors.white),
+        title: Text(title, style: const TextStyle(color: Colors.white)),
+        onTap: onTap,
       ),
     );
   }
@@ -265,7 +211,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             blankSpace: 80.0,
                             velocity: 40.0,
-                            pauseAfterRound: Duration(seconds: 0),
+                            pauseAfterRound: const Duration(seconds: 0),
                             startPadding: 10.0,
                           ),
                         ),
@@ -290,6 +236,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         'title': song.title,
                                         'artist': song.artist,
                                         'imageUrl': song.imageUrl,
+                                        'audioUrl': song.audioUrl,
                                       })
                                   .toList(),
                               initialIndex: songIndex,
@@ -346,6 +293,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   'title': song.title,
                                   'artist': song.artist,
                                   'imageUrl': song.imageUrl,
+                                  'audioUrl': song.audioUrl,
                                 })
                             .toList(),
                         initialIndex: index,

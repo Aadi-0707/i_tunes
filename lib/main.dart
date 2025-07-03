@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:i_tunes/view/splash_screen.dart';
 import 'package:just_audio_background/just_audio_background.dart';
-import 'package:audio_service/audio_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

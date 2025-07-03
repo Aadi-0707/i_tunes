@@ -11,8 +11,10 @@
         android:theme="@style/Theme.iTunes">
 
 
-        <service android:name="com.ryanheise.just_audio_background.MediaNotificationService"
-         android:exported="false" />
+        <service
+            android:name="com.ryanheise.just_audio_background.MediaNotificationService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
 
         <activity
             android:name=".MainActivity"

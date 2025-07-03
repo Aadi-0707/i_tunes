@@ -10,7 +10,6 @@ void main() async {
     androidNotificationChannelName: 'iTunes Playback',
     androidNotificationOngoing: true,
     androidShowNotificationBadge: true,
-    androidNotificationIcon: 'drawable/ic_music_note',
   );
 
   runApp(const MyApp());

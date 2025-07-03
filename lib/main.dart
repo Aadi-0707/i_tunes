@@ -9,7 +9,6 @@ void main() async {
     androidNotificationChannelId: 'com.itunes.audio',
     androidNotificationChannelName: 'Audio playback',
     androidNotificationOngoing: true,
-    androidNotificationIcon: 'drawable/ic_notification',
   );
   runApp(const MyApp());
 }

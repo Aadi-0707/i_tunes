@@ -6,7 +6,7 @@ import 'package:just_audio_background/just_audio_background.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await JustAudioBackground.init(
-    androidNotificationChannelId: 'com.itunes.audio',
+    androidNotificationChannelId: 'com.ryanheise.bg_demo.channel.audio',
     androidNotificationChannelName: 'Audio playback',
     androidNotificationOngoing: true,
   );

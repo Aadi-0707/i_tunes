@@ -1,14 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:i_tunes/view/splash_screen.dart';
+import 'package:just_audio_background/just_audio_background.dart';
+import 'package:audio_service/audio_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(MyApp());
+  await JustAudioBackground.init(
+    androidNotificationChannelId: 'com.itunes.audio',
+    androidNotificationChannelName: 'iTunes Playback',
+    androidNotificationOngoing: true,
+    androidShowNotificationBadge: true,
+    androidNotificationIcon: 'drawable/ic_music_note',
+  );
+
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
@@ -18,6 +29,10 @@ class MyApp extends StatelessWidget {
       builder: (context, child) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.redAccent),
+            useMaterial3: true,
+          ),
           home: const SplashScreen(),
         );
       },

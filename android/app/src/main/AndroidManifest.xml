@@ -7,15 +7,7 @@
     <application
         android:label="i Tunes"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher"
-        android:theme="@style/Theme.iTunes">
-
-
-        <service
-            android:name="com.ryanheise.just_audio_background.MediaNotificationService"
-            android:exported="false"
-            android:foregroundServiceType="mediaPlayback" />
-
+        android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
             android:exported="true"

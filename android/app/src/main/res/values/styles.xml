@@ -1,21 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <style name="Theme.iTunes" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your app theme here -->
-        <item name="colorPrimary">#F44336</item>
-        <item name="colorPrimaryVariant">#D32F2F</item>
+
+    <!-- Launch theme (for splash screen) -->
+    <style name="LaunchTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowBackground">@drawable/launch_background</item>
+    </style>
+
+    <!-- Flutter Normal Theme -->
+    <style name="NormalTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Customize your theme here -->
+        <item name="colorPrimary">#D32F2F</item>
+        <item name="colorPrimaryVariant">#B71C1C</item>
         <item name="colorOnPrimary">#FFFFFF</item>
-        <item name="android:statusBarColor" tools:targetApi="l">#B71C1C</item>
     </style>
 
-    <!-- Used while Flutter initializes -->
-    <style name="LaunchTheme" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="android:background">@drawable/launch_background</item>
+    <!-- App Theme -->
+    <style name="Theme.iTunes" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#D32F2F</item>
+        <item name="colorPrimaryVariant">#B71C1C</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="android:statusBarColor">#B71C1C</item>
     </style>
 
-    <!-- Applied once Flutter has initialized -->
-    <style name="NormalTheme" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="android:windowBackground">@android:color/white</item>
-    </style>
 </resources>
+
+
+
+
 

@@ -38,11 +38,12 @@ dependencies:
   flutter_screenutil: ^5.9.0
   dio: ^5.8.0+1
   marquee: ^2.2.3
-  just_audio: ^0.10.4
-  path_provider: 
-  just_audio_background: ^0.0.1-beta.17
-  audio_session: ^0.2.2
-  audio_service: ^0.18.18
+  path_provider: ^2.0.11
+  just_audio: ^0.9.36
+  audio_service: ^0.18.11
+  audio_session: ^0.1.13
+  just_audio_background: ^0.0.1-beta.10
+ 
 
 flutter_launcher_icons:
   android: true

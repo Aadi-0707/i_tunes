@@ -8,6 +8,7 @@ import 'package:i_tunes/view/drawer/feedback_screen.dart';
 import 'package:i_tunes/view/song%20player/play_screen.dart';
 import 'package:marquee/marquee.dart';
 import 'package:i_tunes/view/drawer/playlist_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -26,6 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     fetchSongs();
+    loadPlaylist();
   }
 
   Future<void> fetchSongs() async {
@@ -58,6 +60,25 @@ class _HomeScreenState extends State<HomeScreen> {
     } finally {
       setState(() {
         isLoading = false;
+      });
+    }
+  }
+
+  Future<void> savePlaylist() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> songList =
+        playlist.map((song) => jsonEncode(song.toJson())).toList();
+    await prefs.setStringList('playlist', songList);
+  }
+
+  Future<void> loadPlaylist() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String>? songList = prefs.getStringList('playlist');
+    if (songList != null) {
+      setState(() {
+        playlist = songList
+            .map((songString) => SongModel.fromJson(jsonDecode(songString)))
+            .toList();
       });
     }
   }

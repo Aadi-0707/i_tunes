@@ -9,21 +9,20 @@ class NextArrowButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 32.0.w, right: 16.0.w),
+      padding: EdgeInsets.only(bottom: 32.0.h, right: 16.0.w),
       child: Align(
         alignment: Alignment.bottomRight,
         child: GestureDetector(
           onTap: onPressed,
           child: Container(
-            width: 60,
-            height: 60,
+            width: 50.w,
+            height: 50.h,
             decoration: BoxDecoration(
-              shape: BoxShape.rectangle,
+              shape: BoxShape.circle,
               image: DecorationImage(
                 image: AssetImage('assets/images/music_bg.png'),
                 fit: BoxFit.cover,
               ),
-              borderRadius: BorderRadius.circular(50.r),
             ),
             child: Icon(Icons.arrow_forward_ios_outlined,
                 color: Colors.white, size: 24.w),

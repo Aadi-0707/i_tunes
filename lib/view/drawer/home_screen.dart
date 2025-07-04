@@ -4,8 +4,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:i_tunes/models/all_models.dart';
-import 'package:i_tunes/view/play_screen.dart';
+import 'package:i_tunes/view/drawer/feedback_screen.dart';
+import 'package:i_tunes/view/song%20player/play_screen.dart';
 import 'package:marquee/marquee.dart';
+import 'package:i_tunes/view/drawer/playlist_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,6 +19,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool isLoading = true;
   List<SongModel> songs = [];
+  List<SongModel> playlist = [];
   SongModel? selectedSong;
 
   @override
@@ -117,11 +120,23 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: Colors.white)),
             ),
           ),
-          _buildDrawerTile(Icons.music_note, 'Home', () {}),
-          _buildDrawerTile(Icons.queue_music, 'Playlist', () {
+          _buildDrawerTile(Icons.music_note, 'Home', () {
             Navigator.pop(context);
           }),
-          _buildDrawerTile(Icons.feedback, 'Feedback', () {}),
+          _buildDrawerTile(Icons.queue_music, 'Playlist', () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PlaylistScreen(playlistSongs: playlist),
+              ),
+            );
+          }),
+          _buildDrawerTile(Icons.feedback, 'Feedback', () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => FeedbackScreen()),
+            );
+          }),
         ],
       ),
     );
@@ -279,7 +294,48 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: const TextStyle(color: Colors.white)),
                 subtitle: Text(song.artist,
                     style: const TextStyle(color: Colors.white70)),
-                trailing: const Icon(Icons.play_arrow, color: Colors.white),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        playlist.contains(song)
+                            ? Icons.bookmark
+                            : Icons.bookmark_border,
+                        color: Colors.white,
+                        size: 26,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          if (playlist.contains(song)) {
+                            playlist.remove(song);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Removed from Playlist',
+                                    style: TextStyle(color: Colors.white)),
+                                duration: Duration(seconds: 1),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          } else {
+                            playlist.add(song);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Added to Playlist',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                duration: Duration(seconds: 1),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        });
+                      },
+                    ),
+                    const Icon(Icons.play_arrow, color: Colors.white, size: 26),
+                  ],
+                ),
                 onTap: () {
                   setState(() {
                     selectedSong = song;

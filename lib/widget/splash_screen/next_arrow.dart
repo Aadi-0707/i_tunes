@@ -15,17 +15,18 @@ class NextArrowButton extends StatelessWidget {
         child: GestureDetector(
           onTap: onPressed,
           child: Container(
-            width: 60.w,
-            height: 60.w,
+            width: 60,
+            height: 60,
             decoration: BoxDecoration(
               shape: BoxShape.rectangle,
               image: DecorationImage(
                 image: AssetImage('assets/images/music_bg.png'),
                 fit: BoxFit.cover,
               ),
-              borderRadius: BorderRadius.circular(20.r),
+              borderRadius: BorderRadius.circular(50.r),
             ),
-            child: Icon(Icons.arrow_forward, color: Colors.white, size: 32.w),
+            child: Icon(Icons.arrow_forward_ios_outlined,
+                color: Colors.white, size: 24.w),
           ),
         ),
       ),

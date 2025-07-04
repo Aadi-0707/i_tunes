@@ -4,119 +4,71 @@ import 'package:i_tunes/widget/splash_screen/dot.dart';
 import 'package:i_tunes/widget/splash_screen/next_arrow.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    int activeIndex = 0;
-    return Scaffold(
-      backgroundColor: Colors.redAccent[50],
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset('assets/images/logo.png', width: 200.w, height: 200.h),
-            SizedBox(height: 30.h),
-            Text(
-              'My Music App',
-              style: TextStyle(fontSize: 28.sp, fontWeight: FontWeight.w600),
-            ),
-            SizedBox(
-              height: 30.h,
-            ),
-            Dot(activeIndex: activeIndex),
-          ],
-        ),
-      ),
-      floatingActionButton: NextArrowButton(
-        onPressed: () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const SecondSplashScreen(),
-            ),
-          );
-        },
-      ),
-    );
-  }
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class SecondSplashScreen extends StatelessWidget {
-  const SecondSplashScreen({super.key});
+class _SplashScreenState extends State<SplashScreen> {
+  int activeIndex = 0;
+
+  final List<String> splashTexts = [
+    'My Music App',
+    'Explore Millions of Tracks at Your Fingertips',
+    'Unleash the Power of Music',
+  ];
+
+  void _nextPage() {
+    if (activeIndex < 2) {
+      setState(() {
+        activeIndex++;
+      });
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    int activeIndex = 1;
     return Scaffold(
       backgroundColor: Colors.redAccent[50],
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset('assets/images/logo.png', width: 200.w, height: 200.h),
-            SizedBox(height: 30.h),
-            Padding(
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Center(
+            child: Image.asset('assets/images/logo.png',
+                width: 200.w, height: 200.h),
+          ),
+          SizedBox(),
+          Center(
+            child: Container(
+              width: 320.w,
+              height: 80.h,
+              alignment: Alignment.center,
               padding: EdgeInsets.symmetric(horizontal: 24.0.w),
+              decoration: BoxDecoration(
+                color: Colors.redAccent[50],
+              ),
               child: Text(
-                'Explore Millions of Tracks at Your Fingertips',
+                splashTexts[activeIndex],
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 26.sp, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontSize: 26.sp,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
-            SizedBox(height: 30.h),
-            Dot(activeIndex: activeIndex),
-          ],
-        ),
+          ),
+          SizedBox(height: 60.h),
+          Dot(activeIndex: activeIndex),
+        ],
       ),
-      floatingActionButton: NextArrowButton(
-        onPressed: () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const ThirdSplashScreen(),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class ThirdSplashScreen extends StatelessWidget {
-  const ThirdSplashScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    int activeIndex = 2;
-    return Scaffold(
-      backgroundColor: Colors.redAccent[50],
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset('assets/images/logo.png', width: 200.w, height: 200.h),
-            SizedBox(height: 30.h),
-            Text(
-              'Unleash the Power of Music',
-              style: TextStyle(fontSize: 26.sp, fontWeight: FontWeight.w600),
-            ),
-            SizedBox(height: 30.h),
-            Dot(activeIndex: activeIndex),
-          ],
-        ),
-      ),
-      floatingActionButton: NextArrowButton(
-        onPressed: () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const HomeScreen(),
-            ),
-          );
-        },
-      ),
+      floatingActionButton: NextArrowButton(onPressed: _nextPage),
     );
   }
 }

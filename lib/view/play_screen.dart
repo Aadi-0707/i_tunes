@@ -57,6 +57,10 @@ class _PlayScreenState extends State<PlayScreen> {
       setState(() {
         isPlaying = state.playing;
       });
+
+      if (state.processingState == ProcessingState.completed) {
+        playNext();
+      }
     });
   }
 
@@ -79,6 +83,10 @@ class _PlayScreenState extends State<PlayScreen> {
           ),
         ),
       );
+
+      setState(() {
+        progress = 0;
+      });
 
       await _audioPlayer.play();
     } catch (e) {

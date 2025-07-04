@@ -37,7 +37,11 @@ class _FeedbackScreenState extends State<FeedbackScreen>
     if (selectedEmoji == -1 || feedbackController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text("Please select an emoji and write feedback")),
+          content: Text("Please select an emoji and write feedback",
+              style: TextStyle(color: Colors.white)),
+          duration: Duration(seconds: 1),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
@@ -45,7 +49,12 @@ class _FeedbackScreenState extends State<FeedbackScreen>
     _buttonController.forward().then((_) {
       _buttonController.reverse();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Thank you for your feedback!")),
+        const SnackBar(
+          content: Text("Thank you for your feedback!",
+              style: TextStyle(color: Colors.white)),
+          duration: Duration(seconds: 1),
+          backgroundColor: Colors.red,
+        ),
       );
 
       setState(() {

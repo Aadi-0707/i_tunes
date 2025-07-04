@@ -37,4 +37,12 @@ class SongModel {
       audioUrl: audioUrl,
     );
   }
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'artist': artist,
+      'imageUrl': imageUrl,
+      'audioUrl': audioUrl,
+    };
+  }
 }

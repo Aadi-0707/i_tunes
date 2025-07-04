@@ -157,7 +157,7 @@ class _PlayScreenState extends State<PlayScreen> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.5),
+                    color: Colors.black.withAlpha(128),
                     blurRadius: 20.r,
                     offset: Offset(0, 15.h),
                   ),

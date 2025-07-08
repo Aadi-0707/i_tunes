@@ -20,7 +20,6 @@ class PlayScreen extends StatefulWidget {
 }
 
 class _PlayScreenState extends State<PlayScreen> {
-  late int currentSongIndex;
   late AudioPlayer _audioPlayer;
   double progress = 0.0;
   bool isPlaying = false;
@@ -29,85 +28,50 @@ class _PlayScreenState extends State<PlayScreen> {
   @override
   void initState() {
     super.initState();
-    currentSongIndex = widget.initialIndex;
     _audioPlayer = AudioPlayer();
-    _configureAudio();
-    _setAudio();
+    _setupAudio();
   }
 
-  void _configureAudio() async {
+  Future<void> _setupAudio() async {
     final session = await AudioSession.instance;
     await session.configure(AudioSessionConfiguration.music());
 
     _audioPlayer.durationStream.listen((duration) {
       if (duration != null) {
-        setState(() {
-          totalDuration = duration;
-        });
+        setState(() => totalDuration = duration);
       }
     });
 
     _audioPlayer.positionStream.listen((position) {
-      setState(() {
-        progress = position.inSeconds.toDouble();
-      });
+      setState(() => progress = position.inSeconds.toDouble());
     });
 
     _audioPlayer.playerStateStream.listen((state) {
-      setState(() {
-        isPlaying = state.playing;
-      });
-
-      if (state.processingState == ProcessingState.completed) {
-        playNext();
-      }
+      setState(() => isPlaying = state.playing);
     });
-  }
 
-  void _setAudio() async {
-    final currentSong = widget.songs[currentSongIndex];
-    final audioUrl = currentSong['audioUrl'] ?? '';
-    final title = currentSong['title'] ?? 'Unknown';
-    final artist = currentSong['artist'] ?? 'Unknown';
-    final imageUrl = currentSong['imageUrl'] ?? '';
-
-    try {
-      await _audioPlayer.setAudioSource(
-        AudioSource.uri(
-          Uri.parse(audioUrl),
+    final playlist = ConcatenatingAudioSource(
+      children: widget.songs.map((song) {
+        return AudioSource.uri(
+          Uri.parse(song['audioUrl'] ?? ''),
           tag: MediaItem(
-            id: audioUrl,
-            title: title,
-            artist: artist,
-            artUri: Uri.parse(imageUrl),
+            id: song['audioUrl']!,
+            title: song['title'] ?? 'Unknown',
+            artist: song['artist'] ?? 'Unknown',
+            artUri: Uri.parse(song['imageUrl'] ?? ''),
           ),
-        ),
-      );
+        );
+      }).toList(),
+    );
 
-      setState(() {
-        progress = 0;
-      });
-
-      await _audioPlayer.play();
-    } catch (e) {
-      debugPrint('Error loading audio: $e');
-    }
+    await _audioPlayer.setLoopMode(LoopMode.all);
+    await _audioPlayer.setAudioSource(playlist,
+        initialIndex: widget.initialIndex);
+    await _audioPlayer.play();
   }
 
-  void playNext() {
-    setState(() {
-      currentSongIndex = (currentSongIndex + 1) % widget.songs.length;
-    });
-    _setAudio();
-  }
-
-  void playPrevious() {
-    setState(() {
-      currentSongIndex =
-          (currentSongIndex - 1 + widget.songs.length) % widget.songs.length;
-    });
-    _setAudio();
-  }
+  void _playNext() => _audioPlayer.seekToNext();
+  void _playPrevious() => _audioPlayer.seekToPrevious();
 
   @override
   void dispose() {
@@ -124,7 +88,8 @@ class _PlayScreenState extends State<PlayScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final currentSong = widget.songs[currentSongIndex];
+    final currentSong =
+        widget.songs[_audioPlayer.currentIndex ?? widget.initialIndex];
 
     return Scaffold(
       backgroundColor: Colors.redAccent[50],
@@ -189,9 +154,7 @@ class _PlayScreenState extends State<PlayScreen> {
                     min: 0.0,
                     max: totalDuration.inSeconds.toDouble(),
                     onChanged: (value) {
-                      setState(() {
-                        progress = value;
-                      });
+                      setState(() => progress = value);
                       _audioPlayer.seek(Duration(seconds: value.toInt()));
                     },
                     activeColor: Colors.red,
@@ -209,7 +172,7 @@ class _PlayScreenState extends State<PlayScreen> {
               children: [
                 IconButton(
                   icon: Icon(Icons.skip_previous, size: 35.w),
-                  onPressed: playPrevious,
+                  onPressed: _playPrevious,
                 ),
                 IconButton(
                   icon: Icon(
@@ -229,7 +192,7 @@ class _PlayScreenState extends State<PlayScreen> {
                 ),
                 IconButton(
                   icon: Icon(Icons.skip_next, size: 35.w),
-                  onPressed: playNext,
+                  onPressed: _playNext,
                 ),
               ],
             ),

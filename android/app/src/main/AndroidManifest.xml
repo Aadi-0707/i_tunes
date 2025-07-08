@@ -10,8 +10,8 @@
         android:usesCleartextTraffic="true"
         android:label="iTunes"
         android:icon="@mipmap/ic_launcher"
-        android:name="io.flutter.app.FlutterApplication">
-
+        android:name="${applicationName}">
+        
         <!-- Main Activity -->
         <activity
             android:name=".MainActivity"

@@ -10,10 +10,9 @@
         android:usesCleartextTraffic="true"
         android:label="iTunes"
         android:icon="@mipmap/ic_launcher"
-                android:name="${applicationName}"
->
+        android:name="io.flutter.app.FlutterApplication">
 
-        <!-- MainActivity (launch entry) -->
+        <!-- Main Activity -->
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
@@ -28,25 +27,24 @@
             </intent-filter>
         </activity>
 
-        <!-- Audio Service for Background Playback -->
-<service
-    android:name="com.ryanheise.audioservice.AudioService"
-    android:exported="true"
-    android:foregroundServiceType="mediaPlayback">
-    <intent-filter>
-        <action android:name="android.media.browse.MediaBrowserService" />
-    </intent-filter>
-</service>
+        <!-- Audio Service -->
+        <service
+            android:name="com.ryanheise.audioservice.AudioService"
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback">
+            <intent-filter>
+                <action android:name="android.media.browse.MediaBrowserService" />
+            </intent-filter>
+        </service>
 
-<!-- Media Button Receiver -->
-<receiver
-    android:name="com.ryanheise.audioservice.MediaButtonReceiver"
-    android:exported="true">
-    <intent-filter>
-        <action android:name="android.intent.action.MEDIA_BUTTON" />
-    </intent-filter>
-</receiver>
-
+        <!-- Media Button Receiver -->
+        <receiver
+            android:name="com.ryanheise.audioservice.MediaButtonReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
 
         <!-- Flutter embedding version -->
         <meta-data

@@ -33,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> fetchSongs() async {
     try {
       final response = await Dio().get(
-        'http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topsongs/limit=20/json',
+        'https://itunes.apple.com/us/rss/topsongs/limit=20/json',
       );
 
       if (response.statusCode == 200) {
@@ -81,6 +81,37 @@ class _HomeScreenState extends State<HomeScreen> {
             .toList();
       });
     }
+  }
+
+  bool isSongInPlaylist(SongModel song) {
+    return playlist.any((s) => s.audioUrl == song.audioUrl);
+  }
+
+  void togglePlaylist(SongModel song) async {
+    setState(() {
+      if (isSongInPlaylist(song)) {
+        playlist.removeWhere((s) => s.audioUrl == song.audioUrl);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Removed from Playlist',
+                style: TextStyle(color: Colors.white)),
+            duration: Duration(seconds: 1),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } else {
+        playlist.add(song);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Added to Playlist',
+                style: TextStyle(color: Colors.white)),
+            duration: Duration(seconds: 1),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    });
+    await savePlaylist();
   }
 
   @override
@@ -148,7 +179,15 @@ class _HomeScreenState extends State<HomeScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => PlaylistScreen(playlistSongs: playlist),
+                builder: (context) => PlaylistScreen(
+                  playlistSongs: playlist,
+                  onPlaylistChanged: (updatedList) {
+                    setState(() {
+                      playlist = updatedList;
+                    });
+                    savePlaylist();
+                  },
+                ),
               ),
             );
           }),
@@ -176,7 +215,7 @@ class _HomeScreenState extends State<HomeScreen> {
           BoxShadow(
             color: Colors.redAccent.withAlpha(51),
             blurRadius: 8,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -191,198 +230,162 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildFirstCard(SongModel song) {
     int songIndex = songs.indexOf(song);
 
-    return Stack(
-      children: [
-        Container(
-          margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16.r),
-            image: const DecorationImage(
-              image: AssetImage('assets/images/music_bg.png'),
-              fit: BoxFit.cover,
-            ),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16.r),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
-              child: Padding(
-                padding: EdgeInsets.all(15.0.w),
-                child: Row(
-                  children: [
-                    Hero(
-                      tag: 'albumArt',
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 10.h),
-                        child: Container(
-                          height: 100,
-                          width: 100,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(90.r),
-                            image: DecorationImage(
-                              image: NetworkImage(song.imageUrl),
-                              fit: BoxFit.cover,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.white.withAlpha(51),
-                                blurRadius: 20.r,
-                                offset: Offset(0, 6.h),
-                              ),
-                            ],
-                          ),
-                        ),
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16.r),
+        image: const DecorationImage(
+          image: AssetImage('assets/images/music_bg.png'),
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16.r),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
+          child: Padding(
+            padding: EdgeInsets.all(15.w),
+            child: Row(
+              children: [
+                Hero(
+                  tag: 'albumArt',
+                  child: Container(
+                    height: 100,
+                    width: 100,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(90.r),
+                      image: DecorationImage(
+                        image: NetworkImage(song.imageUrl),
+                        fit: BoxFit.cover,
                       ),
-                    ),
-                    Expanded(
-                      child: ListTile(
-                        title: SizedBox(
-                          height: 25.h,
-                          child: Marquee(
-                            text: song.title,
-                            style: TextStyle(
-                              fontSize: 22.sp,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                            blankSpace: 80.0,
-                            velocity: 40.0,
-                            pauseAfterRound: const Duration(seconds: 0),
-                            startPadding: 10.0,
-                          ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.white.withAlpha(51),
+                          blurRadius: 20.r,
+                          offset: Offset(0, 6.h),
                         ),
-                        subtitle: Text(
-                          song.artist,
-                          style: const TextStyle(color: Colors.white70),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
+                      ],
                     ),
-                    IconButton(
-                      icon: Icon(Icons.play_circle_fill,
-                          color: Colors.white, size: 36.h),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PlayScreen(
-                              songs: songs
-                                  .map((song) => {
-                                        'title': song.title,
-                                        'artist': song.artist,
-                                        'imageUrl': song.imageUrl,
-                                        'audioUrl': song.audioUrl,
-                                      })
-                                  .toList(),
-                              initialIndex: songIndex,
-                            ),
-                          ),
-                        );
-                      },
-                    )
-                  ],
+                  ),
                 ),
-              ),
+                Expanded(
+                  child: ListTile(
+                    title: SizedBox(
+                      height: 25.h,
+                      child: Marquee(
+                        text: song.title,
+                        style: TextStyle(
+                            fontSize: 22.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white),
+                        blankSpace: 80.0,
+                        velocity: 40.0,
+                        pauseAfterRound: const Duration(seconds: 0),
+                        startPadding: 10.0,
+                      ),
+                    ),
+                    subtitle: Text(
+                      song.artist,
+                      style: const TextStyle(color: Colors.white70),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.play_circle_fill,
+                      color: Colors.white, size: 36.h),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PlayScreen(
+                          songs: songs
+                              .map((song) => {
+                                    'title': song.title,
+                                    'artist': song.artist,
+                                    'imageUrl': song.imageUrl,
+                                    'audioUrl': song.audioUrl,
+                                  })
+                              .toList(),
+                          initialIndex: songIndex,
+                        ),
+                      ),
+                    );
+                  },
+                )
+              ],
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 
   Widget _buildSecondCard(SongModel song, int index) {
-    return Stack(
-      children: [
-        Container(
-          margin: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12.r),
-            image: const DecorationImage(
-              image: AssetImage('assets/images/music_bg.png'),
-              fit: BoxFit.cover,
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12.r),
+        image: const DecorationImage(
+          image: AssetImage('assets/images/music_bg.png'),
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12.r),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundImage: NetworkImage(song.imageUrl),
             ),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12.r),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundImage: NetworkImage(song.imageUrl),
+            title:
+                Text(song.title, style: const TextStyle(color: Colors.white)),
+            subtitle: Text(song.artist,
+                style: const TextStyle(color: Colors.white70)),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Icon(
+                    isSongInPlaylist(song)
+                        ? Icons.bookmark
+                        : Icons.bookmark_border,
+                    color: Colors.white,
+                    size: 26,
+                  ),
+                  onPressed: () {
+                    togglePlaylist(song);
+                  },
                 ),
-                title: Text(song.title,
-                    style: const TextStyle(color: Colors.white)),
-                subtitle: Text(song.artist,
-                    style: const TextStyle(color: Colors.white70)),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(
-                        playlist.contains(song)
-                            ? Icons.bookmark
-                            : Icons.bookmark_border,
-                        color: Colors.white,
-                        size: 26,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          if (playlist.contains(song)) {
-                            playlist.remove(song);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Removed from Playlist',
-                                    style: TextStyle(color: Colors.white)),
-                                duration: Duration(seconds: 1),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                          } else {
-                            playlist.add(song);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Added to Playlist',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                                duration: Duration(seconds: 1),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                          }
-                        });
-                      },
-                    ),
-                    const Icon(Icons.play_arrow, color: Colors.white, size: 26),
-                  ],
-                ),
-                onTap: () {
-                  setState(() {
-                    selectedSong = song;
-                  });
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PlayScreen(
-                        songs: songs
-                            .map((song) => {
-                                  'title': song.title,
-                                  'artist': song.artist,
-                                  'imageUrl': song.imageUrl,
-                                  'audioUrl': song.audioUrl,
-                                })
-                            .toList(),
-                        initialIndex: index,
-                      ),
-                    ),
-                  );
-                },
-              ),
+                const Icon(Icons.play_arrow, color: Colors.white, size: 26),
+              ],
             ),
+            onTap: () {
+              setState(() {
+                selectedSong = song;
+              });
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PlayScreen(
+                    songs: songs
+                        .map((song) => {
+                              'title': song.title,
+                              'artist': song.artist,
+                              'imageUrl': song.imageUrl,
+                              'audioUrl': song.audioUrl,
+                            })
+                        .toList(),
+                    initialIndex: index,
+                  ),
+                ),
+              );
+            },
           ),
         ),
-      ],
+      ),
     );
   }
 }

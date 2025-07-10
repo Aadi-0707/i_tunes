@@ -12,7 +12,7 @@ void main() async {
   await JustAudioBackground.init(
     androidNotificationChannelId: 'com.example.i_tunes.channel.audio',
     androidNotificationChannelName: 'Audio playback',
-    androidNotificationOngoing: true,
+    androidNotificationOngoing: false,
     androidShowNotificationBadge: true,
   );
 

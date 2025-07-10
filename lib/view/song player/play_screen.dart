@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -19,29 +18,45 @@ class PlayScreen extends StatefulWidget {
   State<PlayScreen> createState() => _PlayScreenState();
 }
 
-class _PlayScreenState extends State<PlayScreen> with WidgetsBindingObserver {
-  final AudioPlayer _audioPlayer = AudioPlayer();
+class _PlayScreenState extends State<PlayScreen> {
+  late final AudioPlayer _audioPlayer;
+  late final ValueNotifier<int> _currentIndexNotifier =
+      ValueNotifier(widget.initialIndex);
 
-  Duration _duration = Duration.zero;
-  Duration _position = Duration.zero;
-  int _currentIndex = 0;
+  Duration _progress = Duration.zero;
+  Duration _totalDuration = Duration.zero;
 
-  late StreamSubscription<PlayerState> _playerStateSub;
-  late StreamSubscription<Duration> _positionSub;
-  late StreamSubscription<Duration?> _durationSub;
-  late StreamSubscription<int?> _currentIndexSub;
+  bool isPlaying = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _currentIndex = widget.initialIndex;
-    _initPlayer();
+    _audioPlayer = AudioPlayer();
+    _setupAudio();
   }
 
-  Future<void> _initPlayer() async {
+  Future<void> _setupAudio() async {
     final session = await AudioSession.instance;
-    await session.configure(const AudioSessionConfiguration.music());
+    await session.configure(AudioSessionConfiguration.music());
+
+    // Listen to current index
+    _audioPlayer.currentIndexStream.listen((index) {
+      if (index != null && index < widget.songs.length) {
+        _currentIndexNotifier.value = index;
+      }
+    });
+
+    // Listen to duration
+    _audioPlayer.durationStream.listen((duration) {
+      if (duration != null) {
+        setState(() => _totalDuration = duration);
+      }
+    });
+
+    // Listen to position
+    _audioPlayer.positionStream.listen((position) {
+      setState(() => _progress = position);
+    });
 
     final playlist = ConcatenatingAudioSource(
       children: widget.songs.map((song) {
@@ -57,158 +72,145 @@ class _PlayScreenState extends State<PlayScreen> with WidgetsBindingObserver {
       }).toList(),
     );
 
+    await _audioPlayer.setLoopMode(LoopMode.all);
     await _audioPlayer.setAudioSource(playlist,
         initialIndex: widget.initialIndex);
-    await _audioPlayer.setLoopMode(LoopMode.all);
     await _audioPlayer.play();
-
-    _listenToStreams();
   }
 
-  void _listenToStreams() {
-    _playerStateSub =
-        _audioPlayer.playerStateStream.listen((_) => setState(() {}));
-    _positionSub = _audioPlayer.positionStream
-        .listen((p) => setState(() => _position = p));
-    _durationSub = _audioPlayer.durationStream.listen((d) {
-      if (d != null) setState(() => _duration = d);
-    });
-    _currentIndexSub = _audioPlayer.currentIndexStream.listen((i) {
-      if (i != null) setState(() => _currentIndex = i);
-    });
-  }
+  void _playNext() => _audioPlayer.seekToNext();
+  void _playPrevious() => _audioPlayer.seekToPrevious();
 
   @override
   void dispose() {
-    _playerStateSub.cancel();
-    _positionSub.cancel();
-    _durationSub.cancel();
-    _currentIndexSub.cancel();
     _audioPlayer.dispose();
-    WidgetsBinding.instance.removeObserver(this);
+    _currentIndexNotifier.dispose();
     super.dispose();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      setState(() {
-        _position = _audioPlayer.position;
-        _duration = _audioPlayer.duration ?? Duration.zero;
-      });
-    }
-  }
-
   String _formatTime(Duration duration) {
-    final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
-    final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return '$minutes:$seconds';
+    String twoDigits(int n) => n.toString().padLeft(2, "0");
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return "$minutes:$seconds";
   }
 
   @override
   Widget build(BuildContext context) {
-    final currentSong = widget.songs[_currentIndex];
-    final isPlaying = _audioPlayer.playerState.playing;
-    final processingState = _audioPlayer.playerState.processingState;
+    return ValueListenableBuilder<int>(
+      valueListenable: _currentIndexNotifier,
+      builder: (context, currentIndex, _) {
+        final currentSong = widget.songs[currentIndex];
 
-    return Scaffold(
-      backgroundColor: Colors.redAccent[50],
-      appBar: AppBar(
-        backgroundColor: Colors.redAccent[50],
-        elevation: 0,
-        title: const Text('Playing', style: TextStyle(color: Colors.black)),
-        leading: IconButton(
-          icon:
-              const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
-          onPressed: () {
-            _audioPlayer.stop();
-            Navigator.pop(context);
-          },
-        ),
-      ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
-        child: Column(
-          children: [
-            SizedBox(height: 30.h),
-            Container(
-              height: 350,
-              width: 350,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(340.r),
-                image: DecorationImage(
-                  image: NetworkImage(currentSong['imageUrl'] ?? ''),
-                  fit: BoxFit.cover,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 20.r,
-                    offset: Offset(0, 15.h),
-                  ),
-                ],
-              ),
+        return Scaffold(
+          backgroundColor: Colors.redAccent[50],
+          appBar: AppBar(
+            backgroundColor: Colors.redAccent[50],
+            elevation: 0,
+            title: const Text('Playing', style: TextStyle(color: Colors.black)),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                  color: Colors.black),
+              onPressed: () {
+                _audioPlayer.stop();
+                Navigator.pop(context);
+              },
             ),
-            SizedBox(height: 30.h),
-            Text(currentSong['title'] ?? '',
-                style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.bold)),
-            SizedBox(height: 4.h),
-            Text(currentSong['artist'] ?? '',
-                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w400)),
-            SizedBox(height: 20.h),
-            Row(
+          ),
+          body: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24.0.w, vertical: 20.h),
+            child: Column(
               children: [
-                Text(_formatTime(_position),
-                    style: const TextStyle(color: Colors.grey)),
-                Expanded(
-                  child: Slider(
-                    value: _position.inSeconds
-                        .toDouble()
-                        .clamp(0.0, _duration.inSeconds.toDouble()),
-                    min: 0.0,
-                    max: _duration.inSeconds.toDouble(),
-                    onChanged: (value) {
-                      _audioPlayer.seek(Duration(seconds: value.toInt()));
-                    },
-                    activeColor: Colors.red,
-                  ),
-                ),
-                Text(_formatTime(_duration),
-                    style: const TextStyle(color: Colors.grey)),
-              ],
-            ),
-            SizedBox(height: 20.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                IconButton(
-                    icon: Icon(Icons.skip_previous, size: 35.w),
-                    onPressed: _audioPlayer.seekToPrevious),
-                processingState == ProcessingState.loading ||
-                        processingState == ProcessingState.buffering
-                    ? CircularProgressIndicator()
-                    : IconButton(
-                        icon: Icon(
-                          isPlaying
-                              ? Icons.pause_circle_filled
-                              : Icons.play_circle_fill,
-                          size: 60.w,
-                          color: Colors.red,
-                        ),
-                        onPressed: () {
-                          isPlaying
-                              ? _audioPlayer.pause()
-                              : _audioPlayer.play();
-                        },
+                SizedBox(height: 30.h),
+                Container(
+                  height: 350,
+                  width: 350,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(340.r),
+                    image: DecorationImage(
+                      image: NetworkImage(currentSong['imageUrl'] ?? ''),
+                      fit: BoxFit.cover,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(128),
+                        blurRadius: 20.r,
+                        offset: Offset(0, 15.h),
                       ),
-                IconButton(
-                    icon: Icon(Icons.skip_next, size: 35.w),
-                    onPressed: _audioPlayer.seekToNext),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 30.h),
+                Text(
+                  currentSong['title'] ?? '',
+                  textAlign: TextAlign.center,
+                  style:
+                      TextStyle(fontSize: 22.sp, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  currentSong['artist'] ?? '',
+                  textAlign: TextAlign.center,
+                  style:
+                      TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w400),
+                ),
+                SizedBox(height: 20.h),
+                Row(
+                  children: [
+                    Text(
+                      _formatTime(_progress),
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                    Expanded(
+                      child: Slider(
+                        value: _progress.inMilliseconds.toDouble().clamp(
+                            0.0, _totalDuration.inMilliseconds.toDouble()),
+                        min: 0.0,
+                        max: _totalDuration.inMilliseconds.toDouble(),
+                        onChanged: (value) {
+                          _audioPlayer
+                              .seek(Duration(milliseconds: value.toInt()));
+                        },
+                        activeColor: Colors.red,
+                      ),
+                    ),
+                    Text(
+                      _formatTime(_totalDuration),
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20.h),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.skip_previous, size: 35.w),
+                      onPressed: _playPrevious,
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        isPlaying
+                            ? Icons.pause_circle_filled
+                            : Icons.play_circle_fill,
+                        color: Colors.red,
+                        size: 60.w,
+                      ),
+                      onPressed: () {
+                        isPlaying ? _audioPlayer.pause() : _audioPlayer.play();
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.skip_next, size: 35.w),
+                      onPressed: _playNext,
+                    ),
+                  ],
+                )
               ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

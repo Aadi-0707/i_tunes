@@ -3,11 +3,21 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:i_tunes/view/splash/splash_screen.dart';
 
 void main() async {
-  // WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
   // await JustAudioBackground.init(
-  //   androidNotificationChannelId: 'com.ryanheise.bg_demo.channel.audio',
+  //   androidNotificationChannelId: 'com.example.i_tunes.channel.audio',
   //   androidNotificationChannelName: 'Audio playback',
   //   androidNotificationOngoing: true,
+  //   androidShowNotificationBadge: true,
+  // );
+
+  //   audioHandler = await AudioService.init(
+  //   builder: () => MyAudioHandler(),
+  //   config: const AudioServiceConfig(
+  //    androidNotificationChannelId: 'com.example.i_tunes.channel.audio',
+  //   androidNotificationChannelName: 'Audio playback',
+  //     androidNotificationOngoing: true,
+  //   ),
   // );
   runApp(const MyApp());
 }

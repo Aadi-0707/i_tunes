@@ -1,11 +1,7 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:i_tunes/view/splash/splash_screen.dart';
 import 'package:just_audio_background/just_audio_background.dart';
-
-// import 'package:just_audio_background/just_audio_background.dart';
-late final AudioHandler audioHandler;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,15 +11,6 @@ void main() async {
     androidNotificationOngoing: false,
     androidShowNotificationBadge: true,
   );
-
-  // audioHandler = await AudioService.init(
-  //   builder: () => MyAudioHandler(),
-  //   config: const AudioServiceConfig(
-  //     androidNotificationChannelId: 'com.example.i_tunes.channel.audio',
-  //     androidNotificationChannelName: 'Audio playback',
-  //     androidNotificationOngoing: true,
-  //   ),
-  // );
   runApp(const MyApp());
 }
 

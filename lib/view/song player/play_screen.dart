@@ -25,7 +25,6 @@ class _PlayScreenState extends State<PlayScreen> {
 
   Duration _progress = Duration.zero;
   Duration _totalDuration = Duration.zero;
-
   bool isPlaying = false;
 
   @override
@@ -58,6 +57,14 @@ class _PlayScreenState extends State<PlayScreen> {
       setState(() => _progress = position);
     });
 
+    // Listen to player state (sync play/pause status)
+    _audioPlayer.playerStateStream.listen((state) {
+      final playing =
+          state.playing && state.processingState != ProcessingState.completed;
+      setState(() => isPlaying = playing);
+    });
+
+    // Setup playlist
     final playlist = ConcatenatingAudioSource(
       children: widget.songs.map((song) {
         return AudioSource.uri(
@@ -205,7 +212,7 @@ class _PlayScreenState extends State<PlayScreen> {
                       onPressed: _playNext,
                     ),
                   ],
-                )
+                ),
               ],
             ),
           ),

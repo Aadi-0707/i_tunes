@@ -27,7 +27,6 @@ class _PlayScreenState extends State<PlayScreen> {
   bool isPlaying = false;
   bool _isUserSeeking = false;
   String? _errorMessage;
-  bool _isInitialized = false;
 
   @override
   void initState() {
@@ -39,7 +38,6 @@ class _PlayScreenState extends State<PlayScreen> {
     try {
       setState(() {
         _errorMessage = null;
-        _isInitialized = false;
       });
 
       // Initialize AudioService
@@ -60,15 +58,10 @@ class _PlayScreenState extends State<PlayScreen> {
 
         _setupListeners();
         await _audioHandler!.play();
-
-        setState(() {
-          _isInitialized = true;
-        });
       }
     } catch (e) {
       setState(() {
         _errorMessage = 'Failed to initialize audio: ${e.toString()}';
-        _isInitialized = false;
       });
     }
   }
@@ -145,10 +138,6 @@ class _PlayScreenState extends State<PlayScreen> {
   @override
   Widget build(BuildContext context) {
     if (_errorMessage != null) return _buildErrorScreen();
-
-    if (!_isInitialized) {
-      return _buildLoadingScreen();
-    }
 
     return ValueListenableBuilder<int>(
       valueListenable: _currentIndexNotifier,
@@ -301,33 +290,6 @@ class _PlayScreenState extends State<PlayScreen> {
           onPressed: _playNext,
         ),
       ],
-    );
-  }
-
-  Widget _buildLoadingScreen() {
-    return Scaffold(
-      backgroundColor: Colors.redAccent[50],
-      appBar: AppBar(
-        backgroundColor: Colors.redAccent[50],
-        elevation: 0,
-        title: const Text('Loading...', style: TextStyle(color: Colors.black)),
-        leading: IconButton(
-          icon:
-              const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(color: Colors.red),
-            SizedBox(height: 20),
-            Text('Initializing audio player...',
-                style: TextStyle(fontSize: 16, color: Colors.grey)),
-          ],
-        ),
-      ),
     );
   }
 

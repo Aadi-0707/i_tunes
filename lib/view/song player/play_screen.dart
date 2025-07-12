@@ -27,7 +27,6 @@ class _PlayScreenState extends State<PlayScreen> {
   Duration _totalDuration = Duration.zero;
   bool isPlaying = false;
   bool _isUserSeeking = false;
-  bool _isLoading = true;
   String? _errorMessage;
 
   @override
@@ -38,12 +37,8 @@ class _PlayScreenState extends State<PlayScreen> {
 
   Future<void> _initializeAudioService() async {
     try {
-      setState(() {
-        _isLoading = true;
-        _errorMessage = null;
-      });
+      _errorMessage = null;
 
-      // Initialize AudioService
       _audioHandler = await AudioService.init(
         builder: () => AudioPlayerHandler(),
         config: AudioServiceConfig(
@@ -55,22 +50,13 @@ class _PlayScreenState extends State<PlayScreen> {
         ),
       );
 
-      // Initialize the audio source
       await _audioHandler!
           .initializeAudioSource(widget.songs, widget.initialIndex);
 
-      // Set up listeners
       _setupListeners();
-
-      // Start playing
       await _audioHandler!.play();
-
-      setState(() {
-        _isLoading = false;
-      });
     } catch (e) {
       setState(() {
-        _isLoading = false;
         _errorMessage = 'Failed to initialize audio: ${e.toString()}';
       });
     }
@@ -79,28 +65,24 @@ class _PlayScreenState extends State<PlayScreen> {
   void _setupListeners() {
     if (_audioHandler == null) return;
 
-    // Listen to current index
     _audioHandler!.currentIndexStream.listen((index) {
       if (mounted && index != null && index < widget.songs.length) {
         _currentIndexNotifier.value = index;
       }
     });
 
-    // Listen to duration
     _audioHandler!.durationStream.listen((duration) {
       if (mounted && duration != null) {
         setState(() => _totalDuration = duration);
       }
     });
 
-    // Listen to position - only update if user is not seeking
     _audioHandler!.positionStream.listen((position) {
       if (mounted && !_isUserSeeking) {
         setState(() => _progress = position);
       }
     });
 
-    // Listen to player state
     _audioHandler!.playerStateStream.listen((state) {
       if (mounted) {
         final playing =
@@ -111,21 +93,16 @@ class _PlayScreenState extends State<PlayScreen> {
   }
 
   void _playNext() {
-    if (_audioHandler != null) {
-      _audioHandler!.skipToNext();
-    }
+    _audioHandler?.skipToNext();
   }
 
   void _playPrevious() {
-    if (_audioHandler != null) {
-      _audioHandler!.skipToPrevious();
-    }
+    _audioHandler?.skipToPrevious();
   }
 
   @override
   void dispose() {
     _currentIndexNotifier.dispose();
-    // Don't dispose the audio handler here as it should continue running in background
     super.dispose();
   }
 
@@ -138,38 +115,6 @@ class _PlayScreenState extends State<PlayScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Show loading screen
-    if (_isLoading) {
-      return Scaffold(
-        backgroundColor: Colors.redAccent[50],
-        appBar: AppBar(
-          backgroundColor: Colors.redAccent[50],
-          elevation: 0,
-          title:
-              const Text('Loading...', style: TextStyle(color: Colors.black)),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                color: Colors.black),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ),
-        body: const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircularProgressIndicator(color: Colors.red),
-              SizedBox(height: 20),
-              Text(
-                'Initializing audio player...',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    // Show error screen
     if (_errorMessage != null) {
       return Scaffold(
         backgroundColor: Colors.redAccent[50],
@@ -226,11 +171,7 @@ class _PlayScreenState extends State<PlayScreen> {
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_ios_new_rounded,
                   color: Colors.black),
-              onPressed: () {
-                // Don't stop the audio when leaving the screen
-                // The audio will continue playing in the background
-                Navigator.pop(context);
-              },
+              onPressed: () => Navigator.pop(context),
             ),
           ),
           body: Padding(
@@ -296,10 +237,8 @@ class _PlayScreenState extends State<PlayScreen> {
                           });
                         },
                         onChangeEnd: (value) {
-                          if (_audioHandler != null) {
-                            _audioHandler!
-                                .seek(Duration(milliseconds: value.toInt()));
-                          }
+                          _audioHandler
+                              ?.seek(Duration(milliseconds: value.toInt()));
                           setState(() {
                             _isUserSeeking = false;
                           });

@@ -24,10 +24,9 @@ class AudioPlayerHandler extends BaseAudioHandler
         controls: [
           MediaControl.skipToPrevious,
           if (playing) MediaControl.pause else MediaControl.play,
-          MediaControl.stop,
           MediaControl.skipToNext,
         ],
-        androidCompactActionIndices: const [0, 1, 3],
+        androidCompactActionIndices: const [0, 1, 2],
         processingState: {
           ProcessingState.idle: AudioProcessingState.idle,
           ProcessingState.loading: AudioProcessingState.loading,
@@ -40,6 +39,12 @@ class AudioPlayerHandler extends BaseAudioHandler
         bufferedPosition: _audioPlayer.bufferedPosition,
         speed: _audioPlayer.speed,
         queueIndex: _audioPlayer.currentIndex,
+        // Enable seek bar in notification
+        systemActions: const {
+          MediaAction.seek,
+          MediaAction.seekForward,
+          MediaAction.seekBackward,
+        },
       ));
     });
   }
@@ -55,6 +60,25 @@ class AudioPlayerHandler extends BaseAudioHandler
 
   @override
   Future<void> seek(Duration position) => _audioPlayer.seek(position);
+
+  @override
+  Future<void> seekForward(bool begin) async {
+    if (begin) {
+      final currentPosition = _audioPlayer.position;
+      final newPosition = currentPosition + const Duration(seconds: 10);
+      await _audioPlayer.seek(newPosition);
+    }
+  }
+
+  @override
+  Future<void> seekBackward(bool begin) async {
+    if (begin) {
+      final currentPosition = _audioPlayer.position;
+      final newPosition = currentPosition - const Duration(seconds: 10);
+      await _audioPlayer
+          .seek(newPosition > Duration.zero ? newPosition : Duration.zero);
+    }
+  }
 
   @override
   Future<void> skipToNext() => _audioPlayer.seekToNext();

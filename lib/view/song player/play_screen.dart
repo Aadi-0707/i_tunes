@@ -252,12 +252,19 @@ class _PlayScreenState extends State<PlayScreen> {
             max: _totalDuration.inMilliseconds > 0
                 ? _totalDuration.inMilliseconds.toDouble()
                 : 1.0,
-            onChangeStart: (_) => setState(() => _isUserSeeking = true),
-            onChanged: (value) => setState(
-                () => _progress = Duration(milliseconds: value.toInt())),
-            onChangeEnd: (value) {
-              _audioHandler?.seek(Duration(milliseconds: value.toInt()));
-              setState(() => _isUserSeeking = false);
+            onChangeStart: (_) {
+              setState(() => _isUserSeeking = true);
+            },
+            onChanged: (value) {
+              setState(() => _progress = Duration(milliseconds: value.toInt()));
+            },
+            onChangeEnd: (value) async {
+              final newPosition = Duration(milliseconds: value.toInt());
+              await _audioHandler?.seek(newPosition);
+              setState(() {
+                _progress = newPosition;
+                _isUserSeeking = false;
+              });
             },
             activeColor: Colors.red,
             inactiveColor: Colors.grey[300],

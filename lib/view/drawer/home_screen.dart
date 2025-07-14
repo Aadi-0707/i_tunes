@@ -29,8 +29,12 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    fetchSongs();
-    loadPlaylist();
+    _initializeData();
+  }
+
+  Future<void> _initializeData() async {
+    await loadPlaylist();
+    await fetchSongs();
   }
 
   Future<void> fetchSongs() async {
@@ -313,8 +317,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   })
                               .toList(),
                           initialIndex: songIndex,
-                          audioHandler:
-                              widget.audioHandler, // ✅ Pass audioHandler
+                          audioHandler: widget.audioHandler,
                         ),
                       ),
                     );
@@ -385,7 +388,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             })
                         .toList(),
                     initialIndex: index,
-                    audioHandler: widget.audioHandler, // ✅ Pass audioHandler
+                    audioHandler: widget.audioHandler,
                   ),
                 ),
               );

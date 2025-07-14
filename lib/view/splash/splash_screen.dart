@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:i_tunes/view/drawer/home_screen.dart';
+import 'package:i_tunes/widget/audio_handler.dart';
 import 'package:i_tunes/widget/splash_screen/dot.dart';
 import 'package:i_tunes/widget/splash_screen/next_arrow.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  final AudioPlayerHandler audioHandler;
+
+  const SplashScreen({super.key, required this.audioHandler});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -28,7 +31,8 @@ class _SplashScreenState extends State<SplashScreen> {
     } else {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        MaterialPageRoute(
+            builder: (_) => HomeScreen(audioHandler: widget.audioHandler)),
       );
     }
   }

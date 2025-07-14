@@ -3,15 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:i_tunes/models/all_models.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:i_tunes/view/song%20player/play_screen.dart';
+import 'package:i_tunes/widget/audio_handler.dart';
 
 class PlaylistScreen extends StatefulWidget {
   final List<SongModel> playlistSongs;
   final Function(List<SongModel>) onPlaylistChanged;
+  final AudioPlayerHandler audioHandler;
 
   const PlaylistScreen({
     super.key,
     required this.playlistSongs,
     required this.onPlaylistChanged,
+    required this.audioHandler,
   });
 
   @override
@@ -105,6 +108,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                                         })
                                     .toList(),
                                 initialIndex: index,
+                                audioHandler: widget.audioHandler,
                               ),
                             ),
                           );

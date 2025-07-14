@@ -11,6 +11,7 @@ class PlayScreen extends StatefulWidget {
     super.key,
     required this.songs,
     required this.initialIndex,
+    required AudioPlayerHandler audioHandler,
   });
 
   @override
@@ -18,80 +19,48 @@ class PlayScreen extends StatefulWidget {
 }
 
 class _PlayScreenState extends State<PlayScreen> {
-  AudioPlayerHandler? _audioHandler;
+  final _audioHandler = AudioPlayerHandler();
+
   late final ValueNotifier<int> _currentIndexNotifier =
       ValueNotifier(widget.initialIndex);
-
   Duration _progress = Duration.zero;
   Duration _totalDuration = Duration.zero;
   bool isPlaying = false;
   bool _isUserSeeking = false;
-  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _initializeAudioService();
+    _initializeAudio();
   }
 
-  Future<void> _initializeAudioService() async {
-    try {
-      setState(() {
-        _errorMessage = null;
-      });
-
-      // Initialize AudioService
-      _audioHandler = await AudioService.init(
-        builder: () => AudioPlayerHandler(),
-        config: const AudioServiceConfig(
-          androidNotificationChannelId: 'com.example.i_tunes.channel.audio',
-          androidNotificationChannelName: 'Audio playback',
-          androidNotificationOngoing: true,
-          androidShowNotificationBadge: true,
-          androidStopForegroundOnPause: true,
-        ),
-      ) as AudioPlayerHandler?;
-
-      if (_audioHandler != null) {
-        await _audioHandler!
-            .initializeAudioSource(widget.songs, widget.initialIndex);
-
-        _setupListeners();
-        await _audioHandler!.play();
-      }
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Failed to initialize audio: ${e.toString()}';
-      });
-    }
+  Future<void> _initializeAudio() async {
+    await _audioHandler.initializeAudioSource(
+        widget.songs, widget.initialIndex);
+    _setupListeners();
+    await _audioHandler.play();
   }
 
   void _setupListeners() {
-    if (_audioHandler == null) return;
-
-    // Listen to current index changes
-    _audioHandler!.currentIndexStream.listen((index) {
+    _audioHandler.currentIndexStream.listen((index) {
       if (mounted && index != null && index < widget.songs.length) {
         _currentIndexNotifier.value = index;
       }
     });
 
-    // Listen to duration changes
-    _audioHandler!.durationStream.listen((duration) {
+    _audioHandler.durationStream.listen((duration) {
       if (mounted && duration != null) {
         setState(() => _totalDuration = duration);
       }
     });
 
-    // Listen to position changes
-    _audioHandler!.positionStream.listen((position) {
+    _audioHandler.positionStream.listen((position) {
       if (mounted && !_isUserSeeking) {
         setState(() => _progress = position);
       }
     });
 
-    // Listen to playback state changes
-    _audioHandler!.playbackState.listen((state) {
+    _audioHandler.playbackState.listen((state) {
       if (mounted) {
         final playing = state.playing &&
             state.processingState != AudioProcessingState.completed;
@@ -100,27 +69,10 @@ class _PlayScreenState extends State<PlayScreen> {
     });
   }
 
-  void _playNext() {
-    if (_audioHandler != null) {
-      _audioHandler!.skipToNext();
-    }
-  }
-
-  void _playPrevious() {
-    if (_audioHandler != null) {
-      _audioHandler!.skipToPrevious();
-    }
-  }
-
-  void _togglePlayPause() {
-    if (_audioHandler != null) {
-      if (isPlaying) {
-        _audioHandler!.pause();
-      } else {
-        _audioHandler!.play();
-      }
-    }
-  }
+  void _playNext() => _audioHandler.skipToNext();
+  void _playPrevious() => _audioHandler.skipToPrevious();
+  void _togglePlayPause() =>
+      isPlaying ? _audioHandler.pause() : _audioHandler.play();
 
   @override
   void dispose() {
@@ -137,15 +89,9 @@ class _PlayScreenState extends State<PlayScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_errorMessage != null) return _buildErrorScreen();
-
     return ValueListenableBuilder<int>(
       valueListenable: _currentIndexNotifier,
       builder: (context, currentIndex, _) {
-        if (currentIndex >= widget.songs.length) {
-          return _buildErrorScreen();
-        }
-
         final currentSong = widget.songs[currentIndex];
 
         return Scaffold(
@@ -157,9 +103,9 @@ class _PlayScreenState extends State<PlayScreen> {
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_ios_new_rounded,
                   color: Colors.black),
-              onPressed: () async {
-                await _audioHandler?.stop();
-                if (mounted) Navigator.pop(context);
+              onPressed: () {
+                _audioHandler.pause(); // ❌ Don't stop, just pause
+                Navigator.pop(context);
               },
             ),
           ),
@@ -228,11 +174,7 @@ class _PlayScreenState extends State<PlayScreen> {
   Widget _buildDefaultArtwork() {
     return Container(
       color: Colors.grey[300],
-      child: const Icon(
-        Icons.music_note,
-        size: 100,
-        color: Colors.grey,
-      ),
+      child: const Icon(Icons.music_note, size: 100, color: Colors.grey),
     );
   }
 
@@ -252,15 +194,12 @@ class _PlayScreenState extends State<PlayScreen> {
             max: _totalDuration.inMilliseconds > 0
                 ? _totalDuration.inMilliseconds.toDouble()
                 : 1.0,
-            onChangeStart: (_) {
-              setState(() => _isUserSeeking = true);
-            },
-            onChanged: (value) {
-              setState(() => _progress = Duration(milliseconds: value.toInt()));
-            },
+            onChangeStart: (_) => setState(() => _isUserSeeking = true),
+            onChanged: (value) => setState(
+                () => _progress = Duration(milliseconds: value.toInt())),
             onChangeEnd: (value) async {
               final newPosition = Duration(milliseconds: value.toInt());
-              await _audioHandler?.seek(newPosition);
+              await _audioHandler.seek(newPosition);
               setState(() {
                 _progress = newPosition;
                 _isUserSeeking = false;
@@ -281,65 +220,18 @@ class _PlayScreenState extends State<PlayScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         IconButton(
-          icon: Icon(Icons.skip_previous, size: 35.w),
-          onPressed: _playPrevious,
-        ),
+            icon: Icon(Icons.skip_previous, size: 35.w),
+            onPressed: _playPrevious),
         IconButton(
           icon: Icon(
-            isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill,
-            color: Colors.red,
-            size: 60.w,
-          ),
+              isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill,
+              color: Colors.red,
+              size: 60.w),
           onPressed: _togglePlayPause,
         ),
         IconButton(
-          icon: Icon(Icons.skip_next, size: 35.w),
-          onPressed: _playNext,
-        ),
+            icon: Icon(Icons.skip_next, size: 35.w), onPressed: _playNext),
       ],
-    );
-  }
-
-  Widget _buildErrorScreen() {
-    return Scaffold(
-      backgroundColor: Colors.redAccent[50],
-      appBar: AppBar(
-        backgroundColor: Colors.redAccent[50],
-        elevation: 0,
-        title: const Text('Error', style: TextStyle(color: Colors.black)),
-        leading: IconButton(
-          icon:
-              const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
-          onPressed: () async {
-            await _audioHandler?.stop();
-            if (mounted) Navigator.pop(context);
-          },
-        ),
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
-              const SizedBox(height: 20),
-              Text(_errorMessage ?? 'An error occurred',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 16, color: Colors.grey)),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () => _initializeAudioService(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

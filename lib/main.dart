@@ -2,14 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:i_tunes/view/splash/splash_screen.dart';
 import 'package:audio_service/audio_service.dart';
+import 'package:i_tunes/widget/audio_handler.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  final audioHandler = await AudioService.init(
+    builder: () => AudioPlayerHandler(),
+    config: const AudioServiceConfig(
+      androidNotificationChannelId: 'com.itunes.audio',
+      androidNotificationChannelName: 'iTunes Playback',
+      androidNotificationOngoing: true,
+    ),
+  );
+  runApp(MyApp(audioHandler: audioHandler));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, required this.audioHandler});
+  final AudioPlayerHandler audioHandler;
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +35,8 @@ class MyApp extends StatelessWidget {
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.redAccent),
             useMaterial3: true,
           ),
-          home: AudioServiceWidget(child: const SplashScreen()),
+          home: AudioServiceWidget(
+              child: SplashScreen(audioHandler: audioHandler)),
         );
       },
     );

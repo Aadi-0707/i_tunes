@@ -9,9 +9,12 @@ import 'package:i_tunes/view/song%20player/play_screen.dart';
 import 'package:marquee/marquee.dart';
 import 'package:i_tunes/view/drawer/playlist_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:i_tunes/widget/audio_handler.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final AudioPlayerHandler audioHandler;
+
+  const HomeScreen({super.key, required this.audioHandler});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -187,6 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     });
                     savePlaylist();
                   },
+                  audioHandler: widget.audioHandler,
                 ),
               ),
             );
@@ -309,6 +313,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   })
                               .toList(),
                           initialIndex: songIndex,
+                          audioHandler:
+                              widget.audioHandler, // ✅ Pass audioHandler
                         ),
                       ),
                     );
@@ -379,6 +385,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             })
                         .toList(),
                     initialIndex: index,
+                    audioHandler: widget.audioHandler, // ✅ Pass audioHandler
                   ),
                 ),
               );

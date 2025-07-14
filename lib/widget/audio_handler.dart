@@ -6,21 +6,19 @@ class AudioPlayerHandler extends BaseAudioHandler
     with QueueHandler, SeekHandler {
   static final AudioPlayerHandler _instance = AudioPlayerHandler._internal();
   factory AudioPlayerHandler() => _instance;
+
   AudioPlayerHandler._internal() {
     _init();
   }
 
   final _audioPlayer = AudioPlayer();
   final List<MediaItem> _mediaItems = [];
-
-  // Create BehaviorSubject for playbackState
   final _playbackState = BehaviorSubject<PlaybackState>();
 
   void _init() {
-    // Initialize playback state stream
     _audioPlayer.playbackEventStream.listen((event) {
       final playing = _audioPlayer.playing;
-      _playbackState.add(PlaybackState(
+      playbackState.add(PlaybackState(
         controls: [
           MediaControl.skipToPrevious,
           if (playing) MediaControl.pause else MediaControl.play,
@@ -39,7 +37,6 @@ class AudioPlayerHandler extends BaseAudioHandler
         bufferedPosition: _audioPlayer.bufferedPosition,
         speed: _audioPlayer.speed,
         queueIndex: _audioPlayer.currentIndex,
-        // Enable seek bar in notification
         systemActions: const {
           MediaAction.seek,
           MediaAction.seekForward,
@@ -56,7 +53,10 @@ class AudioPlayerHandler extends BaseAudioHandler
   Future<void> pause() => _audioPlayer.pause();
 
   @override
-  Future<void> stop() => _audioPlayer.stop();
+  Future<void> stop() async {
+    await _audioPlayer.stop();
+    return super.stop();
+  }
 
   @override
   Future<void> seek(Duration position) => _audioPlayer.seek(position);
@@ -64,8 +64,7 @@ class AudioPlayerHandler extends BaseAudioHandler
   @override
   Future<void> seekForward(bool begin) async {
     if (begin) {
-      final currentPosition = _audioPlayer.position;
-      final newPosition = currentPosition + const Duration(seconds: 10);
+      final newPosition = _audioPlayer.position + const Duration(seconds: 10);
       await _audioPlayer.seek(newPosition);
     }
   }
@@ -73,8 +72,7 @@ class AudioPlayerHandler extends BaseAudioHandler
   @override
   Future<void> seekBackward(bool begin) async {
     if (begin) {
-      final currentPosition = _audioPlayer.position;
-      final newPosition = currentPosition - const Duration(seconds: 10);
+      final newPosition = _audioPlayer.position - const Duration(seconds: 10);
       await _audioPlayer
           .seek(newPosition > Duration.zero ? newPosition : Duration.zero);
     }
@@ -117,6 +115,7 @@ class AudioPlayerHandler extends BaseAudioHandler
     );
 
     mediaItem.add(_mediaItems[initialIndex]);
+    _audioPlayer.setLoopMode(LoopMode.all);
 
     _audioPlayer.currentIndexStream.listen((index) {
       if (index != null && index < _mediaItems.length) {
@@ -138,6 +137,7 @@ class AudioPlayerHandler extends BaseAudioHandler
   @override
   Future<void> onTaskRemoved() async {
     await _playbackState.close();
+    await _audioPlayer.dispose();
     super.onTaskRemoved();
   }
 }

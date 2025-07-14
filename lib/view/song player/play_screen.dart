@@ -104,7 +104,7 @@ class _PlayScreenState extends State<PlayScreen> {
               icon: const Icon(Icons.arrow_back_ios_new_rounded,
                   color: Colors.black),
               onPressed: () {
-                _audioHandler.pause(); // ❌ Don't stop, just pause
+                _audioHandler.pause();
                 Navigator.pop(context);
               },
             ),

@@ -18,7 +18,8 @@ class Dot extends StatelessWidget {
           width: 12.w,
           height: 12.h,
           decoration: BoxDecoration(
-            color: isActive ? Colors.red : Colors.grey,
+            color:
+                isActive ? const Color.fromARGB(255, 180, 22, 11) : Colors.grey,
             shape: BoxShape.circle,
           ),
         );

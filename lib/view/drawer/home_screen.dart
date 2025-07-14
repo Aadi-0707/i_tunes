@@ -35,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _initializeData() async {
     await loadPlaylist();
     await fetchSongs();
+    await validatePlaylist();
   }
 
   Future<void> fetchSongs() async {
@@ -72,21 +73,58 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> savePlaylist() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> songList =
-        playlist.map((song) => jsonEncode(song.toJson())).toList();
-    await prefs.setStringList('playlist', songList);
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      List<String> songList =
+          playlist.map((song) => jsonEncode(song.toJson())).toList();
+
+      await prefs.setStringList('playlist', songList);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error saving playlist: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Future<void> loadPlaylist() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String>? songList = prefs.getStringList('playlist');
-    if (songList != null) {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      List<String>? songList = prefs.getStringList('playlist');
+
+      if (songList != null && songList.isNotEmpty) {
+        setState(() {
+          playlist = songList
+              .map((songString) => SongModel.fromJson(jsonDecode(songString)))
+              .toList();
+        });
+      } else {
+        setState(() {
+          playlist = [];
+        });
+      }
+    } catch (e) {
       setState(() {
-        playlist = songList
-            .map((songString) => SongModel.fromJson(jsonDecode(songString)))
-            .toList();
+        playlist = [];
       });
+    }
+  }
+
+  Future<void> validatePlaylist() async {
+    if (playlist.isEmpty || songs.isEmpty) return;
+
+    List<SongModel> validatedPlaylist = playlist
+        .where((playlistSong) =>
+            songs.any((song) => song.audioUrl == playlistSong.audioUrl))
+        .toList();
+
+    if (validatedPlaylist.length != playlist.length) {
+      setState(() {
+        playlist = validatedPlaylist;
+      });
+      await savePlaylist();
     }
   }
 
@@ -113,11 +151,12 @@ class _HomeScreenState extends State<HomeScreen> {
             content: Text('Added to Playlist',
                 style: TextStyle(color: Colors.white)),
             duration: Duration(seconds: 1),
-            backgroundColor: Colors.red,
+            backgroundColor: Colors.green,
           ),
         );
       }
     });
+
     await savePlaylist();
   }
 

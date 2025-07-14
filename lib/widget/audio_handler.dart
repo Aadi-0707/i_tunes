@@ -17,33 +17,57 @@ class AudioPlayerHandler extends BaseAudioHandler
 
   void _init() {
     _audioPlayer.playbackEventStream.listen((event) {
-      final playing = _audioPlayer.playing;
-      playbackState.add(PlaybackState(
-        controls: [
-          MediaControl.skipToPrevious,
-          if (playing) MediaControl.pause else MediaControl.play,
-          MediaControl.skipToNext,
-        ],
-        androidCompactActionIndices: const [0, 1, 2],
-        processingState: {
-          ProcessingState.idle: AudioProcessingState.idle,
-          ProcessingState.loading: AudioProcessingState.loading,
-          ProcessingState.buffering: AudioProcessingState.buffering,
-          ProcessingState.ready: AudioProcessingState.ready,
-          ProcessingState.completed: AudioProcessingState.completed,
-        }[_audioPlayer.processingState]!,
-        playing: playing,
-        updatePosition: _audioPlayer.position,
-        bufferedPosition: _audioPlayer.bufferedPosition,
-        speed: _audioPlayer.speed,
-        queueIndex: _audioPlayer.currentIndex,
-        systemActions: const {
-          MediaAction.seek,
-          MediaAction.seekForward,
-          MediaAction.seekBackward,
-        },
-      ));
+      _updatePlaybackState();
     });
+
+    _audioPlayer.currentIndexStream.listen((index) {
+      if (index != null && index < _mediaItems.length) {
+        mediaItem.add(_mediaItems[index]);
+      }
+    });
+
+    _audioPlayer.durationStream.listen((duration) {
+      final index = _audioPlayer.currentIndex;
+      if (duration != null && index != null && index < _mediaItems.length) {
+        final updatedItem = _mediaItems[index].copyWith(duration: duration);
+        _mediaItems[index] = updatedItem;
+        mediaItem.add(updatedItem);
+        queue.add(_mediaItems);
+      }
+    });
+
+    _audioPlayer.positionStream.listen((position) {
+      _updatePlaybackState();
+    });
+  }
+
+  void _updatePlaybackState() {
+    final playing = _audioPlayer.playing;
+    _playbackState.add(PlaybackState(
+      controls: [
+        MediaControl.skipToPrevious,
+        if (playing) MediaControl.pause else MediaControl.play,
+        MediaControl.skipToNext,
+      ],
+      androidCompactActionIndices: const [0, 1, 2],
+      processingState: {
+        ProcessingState.idle: AudioProcessingState.idle,
+        ProcessingState.loading: AudioProcessingState.loading,
+        ProcessingState.buffering: AudioProcessingState.buffering,
+        ProcessingState.ready: AudioProcessingState.ready,
+        ProcessingState.completed: AudioProcessingState.completed,
+      }[_audioPlayer.processingState]!,
+      playing: playing,
+      updatePosition: _audioPlayer.position,
+      bufferedPosition: _audioPlayer.bufferedPosition,
+      speed: _audioPlayer.speed,
+      queueIndex: _audioPlayer.currentIndex,
+      systemActions: const {
+        MediaAction.seek,
+        MediaAction.seekForward,
+        MediaAction.seekBackward,
+      },
+    ));
   }
 
   @override
@@ -55,34 +79,25 @@ class AudioPlayerHandler extends BaseAudioHandler
   @override
   Future<void> stop() async {
     await _audioPlayer.stop();
+    await _playbackState.close();
     return super.stop();
   }
 
   @override
-  Future<void> seek(Duration position) => _audioPlayer.seek(position);
-
-  @override
-  Future<void> seekForward(bool begin) async {
-    if (begin) {
-      final newPosition = _audioPlayer.position + const Duration(seconds: 10);
-      await _audioPlayer.seek(newPosition);
-    }
+  Future<void> seek(Duration position) async {
+    await _audioPlayer.seek(position);
+    _updatePlaybackState();
   }
 
   @override
-  Future<void> seekBackward(bool begin) async {
-    if (begin) {
-      final newPosition = _audioPlayer.position - const Duration(seconds: 10);
-      await _audioPlayer
-          .seek(newPosition > Duration.zero ? newPosition : Duration.zero);
-    }
+  Future<void> skipToNext() async {
+    await _audioPlayer.seekToNext();
   }
 
   @override
-  Future<void> skipToNext() => _audioPlayer.seekToNext();
-
-  @override
-  Future<void> skipToPrevious() => _audioPlayer.seekToPrevious();
+  Future<void> skipToPrevious() async {
+    await _audioPlayer.seekToPrevious();
+  }
 
   @override
   BehaviorSubject<PlaybackState> get playbackState => _playbackState;
@@ -116,28 +131,12 @@ class AudioPlayerHandler extends BaseAudioHandler
 
     mediaItem.add(_mediaItems[initialIndex]);
     _audioPlayer.setLoopMode(LoopMode.all);
-
-    _audioPlayer.currentIndexStream.listen((index) {
-      if (index != null && index < _mediaItems.length) {
-        mediaItem.add(_mediaItems[index]);
-      }
-    });
-
-    _audioPlayer.durationStream.listen((duration) {
-      final index = _audioPlayer.currentIndex;
-      if (duration != null && index != null && index < _mediaItems.length) {
-        final updatedItem = _mediaItems[index].copyWith(duration: duration);
-        _mediaItems[index] = updatedItem;
-        mediaItem.add(updatedItem);
-        queue.add(_mediaItems);
-      }
-    });
   }
 
   @override
   Future<void> onTaskRemoved() async {
-    await _playbackState.close();
     await _audioPlayer.dispose();
+    await _playbackState.close();
     super.onTaskRemoved();
   }
 }

@@ -1,11 +1,9 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:i_tunes/models/all_models.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:i_tunes/view/song%20player/play_screen.dart';
 import 'package:i_tunes/widget/audio_handler.dart';
 
-class PlaylistScreen extends StatefulWidget {
+class PlaylistScreen extends StatelessWidget {
   final List<SongModel> playlistSongs;
   final Function(List<SongModel>) onPlaylistChanged;
   final AudioPlayerHandler audioHandler;
@@ -18,104 +16,48 @@ class PlaylistScreen extends StatefulWidget {
   });
 
   @override
-  State<PlaylistScreen> createState() => _PlaylistScreenState();
-}
-
-class _PlaylistScreenState extends State<PlaylistScreen> {
-  late List<SongModel> playlistSongs;
-
-  @override
-  void initState() {
-    super.initState();
-    playlistSongs = List.from(widget.playlistSongs);
-  }
-
-  void removeFromPlaylist(SongModel song) {
-    setState(() {
-      playlistSongs.removeWhere((element) => isSameSong(element, song));
-    });
-    widget.onPlaylistChanged(playlistSongs);
-  }
-
-  bool isSameSong(SongModel a, SongModel b) {
-    return a.title == b.title &&
-        a.artist == b.artist &&
-        a.audioUrl == b.audioUrl;
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.redAccent[50],
-      appBar: AppBar(
-        backgroundColor: Colors.redAccent[50],
-        elevation: 0,
-        title: const Text('My Playlist', style: TextStyle(color: Colors.black)),
-        iconTheme: const IconThemeData(color: Colors.black),
-      ),
+      appBar: AppBar(title: const Text('My Playlist')),
       body: playlistSongs.isEmpty
-          ? const Center(child: Text("Your playlist is empty"))
+          ? const Center(child: Text('No songs in playlist'))
           : ListView.builder(
               itemCount: playlistSongs.length,
               itemBuilder: (context, index) {
                 final song = playlistSongs[index];
-                return Container(
-                  margin: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12.r),
-                    image: const DecorationImage(
-                      image: AssetImage('assets/images/music_bg.png'),
-                      fit: BoxFit.cover,
-                    ),
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundImage: NetworkImage(song.imageUrl),
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12.r),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: NetworkImage(song.imageUrl),
+                  title: Text(song.title),
+                  subtitle: Text(song.artist),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () {
+                      final updatedList = List<SongModel>.from(playlistSongs);
+                      updatedList.removeAt(index);
+                      onPlaylistChanged(updatedList);
+                    },
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => PlayScreen(
+                          songs: playlistSongs
+                              .map((song) => {
+                                    'title': song.title,
+                                    'artist': song.artist,
+                                    'imageUrl': song.imageUrl,
+                                    'audioUrl': song.audioUrl,
+                                  })
+                              .toList(),
+                          initialIndex: index,
+                          audioHandler: audioHandler,
                         ),
-                        title: Text(song.title,
-                            style: const TextStyle(color: Colors.white)),
-                        subtitle: Text(song.artist,
-                            style: const TextStyle(color: Colors.white70)),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon:
-                                  const Icon(Icons.delete, color: Colors.white),
-                              onPressed: () {
-                                removeFromPlaylist(song);
-                              },
-                            ),
-                            const Icon(Icons.play_arrow,
-                                color: Colors.white, size: 26),
-                          ],
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => PlayScreen(
-                                songs: playlistSongs
-                                    .map((s) => {
-                                          'title': s.title,
-                                          'artist': s.artist,
-                                          'imageUrl': s.imageUrl,
-                                          'audioUrl': s.audioUrl,
-                                        })
-                                    .toList(),
-                                initialIndex: index,
-                                audioHandler: widget.audioHandler,
-                              ),
-                            ),
-                          );
-                        },
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 );
               },
             ),

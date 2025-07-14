@@ -33,9 +33,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _initializeData() async {
+    setState(() => isLoading = true);
     await loadPlaylist();
     await fetchSongs();
-    await validatePlaylist();
+    setState(() => isLoading = false);
   }
 
   Future<void> fetchSongs() async {
@@ -50,13 +51,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
         final List<dynamic> entries = data['feed']['entry'];
 
-        songs = entries.map((json) => SongModel.fromJson(json)).toList();
-
         setState(() {
+          songs = entries.map((json) => SongModel.fromJson(json)).toList();
           selectedSong = songs.first;
         });
-      } else {
-        throw Exception('Failed to load songs');
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -65,66 +63,25 @@ class _HomeScreenState extends State<HomeScreen> {
           backgroundColor: Colors.red,
         ),
       );
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
     }
   }
 
   Future<void> savePlaylist() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      List<String> songList =
-          playlist.map((song) => jsonEncode(song.toJson())).toList();
-
-      await prefs.setStringList('playlist', songList);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error saving playlist: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> songList =
+        playlist.map((song) => jsonEncode(song.toJson())).toList();
+    await prefs.setStringList('playlist', songList);
   }
 
   Future<void> loadPlaylist() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      List<String>? songList = prefs.getStringList('playlist');
-
-      if (songList != null && songList.isNotEmpty) {
-        setState(() {
-          playlist = songList
-              .map((songString) => SongModel.fromJson(jsonDecode(songString)))
-              .toList();
-        });
-      } else {
-        setState(() {
-          playlist = [];
-        });
-      }
-    } catch (e) {
-      setState(() {
-        playlist = [];
-      });
-    }
-  }
-
-  Future<void> validatePlaylist() async {
-    if (playlist.isEmpty || songs.isEmpty) return;
-
-    List<SongModel> validatedPlaylist = playlist
-        .where((playlistSong) =>
-            songs.any((song) => song.audioUrl == playlistSong.audioUrl))
-        .toList();
-
-    if (validatedPlaylist.length != playlist.length) {
-      setState(() {
-        playlist = validatedPlaylist;
-      });
-      await savePlaylist();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String>? songList = prefs.getStringList('playlist');
+    if (songList != null && songList.isNotEmpty) {
+      playlist = songList
+          .map((songString) => SongModel.fromJson(jsonDecode(songString)))
+          .toList();
+    } else {
+      playlist = [];
     }
   }
 
@@ -136,27 +93,10 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       if (isSongInPlaylist(song)) {
         playlist.removeWhere((s) => s.audioUrl == song.audioUrl);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Removed from Playlist',
-                style: TextStyle(color: Colors.white)),
-            duration: Duration(seconds: 1),
-            backgroundColor: Colors.red,
-          ),
-        );
       } else {
         playlist.add(song);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Added to Playlist',
-                style: TextStyle(color: Colors.white)),
-            duration: Duration(seconds: 1),
-            backgroundColor: Colors.green,
-          ),
-        );
       }
     });
-
     await savePlaylist();
   }
 
@@ -258,13 +198,6 @@ class _HomeScreenState extends State<HomeScreen> {
           fit: BoxFit.cover,
         ),
         borderRadius: BorderRadius.circular(8.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.redAccent.withAlpha(51),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: ListTile(
         leading: Icon(icon, color: Colors.white),
@@ -276,7 +209,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildFirstCard(SongModel song) {
     int songIndex = songs.indexOf(song);
-
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       decoration: BoxDecoration(
@@ -305,13 +237,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         image: NetworkImage(song.imageUrl),
                         fit: BoxFit.cover,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.white.withAlpha(51),
-                          blurRadius: 20.r,
-                          offset: Offset(0, 6.h),
-                        ),
-                      ],
                     ),
                   ),
                 ),

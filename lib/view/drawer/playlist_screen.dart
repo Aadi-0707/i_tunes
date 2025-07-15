@@ -33,11 +33,11 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
   void removeFromPlaylist(SongModel song) {
     setState(() {
       playlistSongs.removeWhere((element) => isSameSong(element, song));
+      song.isBookmarked = false; // Update model
     });
 
-    song.isBookmarked = false;
-
     widget.onPlaylistChanged(playlistSongs);
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Removed from Playlist',
@@ -48,9 +48,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
     );
   }
 
-  bool isSameSong(SongModel a, SongModel b) {
-    return a.audioUrl == b.audioUrl;
-  }
+  bool isSameSong(SongModel a, SongModel b) => a.audioUrl == b.audioUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +69,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
               itemCount: playlistSongs.length,
               itemBuilder: (context, index) {
                 final song = playlistSongs[index];
+
                 return Container(
                   margin: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                   decoration: BoxDecoration(
@@ -98,31 +97,13 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                             IconButton(
                               icon:
                                   const Icon(Icons.delete, color: Colors.white),
-                              onPressed: () {
-                                removeFromPlaylist(song);
-                              },
+                              onPressed: () => removeFromPlaylist(song),
                             ),
                             IconButton(
                               icon: const Icon(Icons.play_arrow,
                                   color: Colors.white, size: 26),
                               onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => PlayScreen(
-                                      songs: playlistSongs
-                                          .map((s) => {
-                                                'title': s.title,
-                                                'artist': s.artist,
-                                                'imageUrl': s.imageUrl,
-                                                'audioUrl': s.audioUrl,
-                                              })
-                                          .toList(),
-                                      initialIndex: index,
-                                      audioHandler: widget.audioHandler,
-                                    ),
-                                  ),
-                                );
+                                _openPlayer(index);
                               },
                             ),
                           ],
@@ -133,6 +114,26 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                 );
               },
             ),
+    );
+  }
+
+  void _openPlayer(int index) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PlayScreen(
+          songs: playlistSongs
+              .map((s) => {
+                    'title': s.title,
+                    'artist': s.artist,
+                    'imageUrl': s.imageUrl,
+                    'audioUrl': s.audioUrl,
+                  })
+              .toList(),
+          initialIndex: index,
+          audioHandler: widget.audioHandler,
+        ),
+      ),
     );
   }
 }

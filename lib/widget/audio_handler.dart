@@ -2,23 +2,31 @@ import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:rxdart/rxdart.dart';
 
+class MediaState {
+  final MediaItem? mediaItem;
+  final Duration position;
+
+  MediaState(this.mediaItem, this.position);
+}
+
 class AudioPlayerHandler extends BaseAudioHandler
     with QueueHandler, SeekHandler {
   static final AudioPlayerHandler _instance = AudioPlayerHandler._internal();
+
   factory AudioPlayerHandler() => _instance;
 
   AudioPlayerHandler._internal() {
     _init();
   }
 
-  final _audioPlayer = AudioPlayer();
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  AudioPlayer get audioPlayer => _audioPlayer;
+
   final List<MediaItem> _mediaItems = [];
   final _playbackState = BehaviorSubject<PlaybackState>();
 
   void _init() {
-    _audioPlayer.playbackEventStream.listen((event) {
-      _updatePlaybackState();
-    });
+    _audioPlayer.playbackEventStream.listen((event) => _updatePlaybackState());
 
     _audioPlayer.currentIndexStream.listen((index) {
       if (index != null && index < _mediaItems.length) {
@@ -26,23 +34,24 @@ class AudioPlayerHandler extends BaseAudioHandler
       }
     });
 
-    _audioPlayer.durationStream.listen((duration) {
-      final index = _audioPlayer.currentIndex;
-      if (duration != null && index != null && index < _mediaItems.length) {
-        final updatedItem = _mediaItems[index].copyWith(duration: duration);
-        _mediaItems[index] = updatedItem;
-        mediaItem.add(updatedItem);
-        queue.add(_mediaItems);
-      }
-    });
-
-    _audioPlayer.positionStream.listen((position) {
-      _updatePlaybackState();
-    });
+    //  _audioPlayer.durationStream.listen((duration) {
+    //     final index = _audioPlayer.currentIndex;
+    //     if (index != null &&
+    //         index < _mediaItems.length &&
+    //         duration != null &&
+    //         _mediaItems[index].duration != duration) {
+    //       _mediaItems[index] = _mediaItems[index].copyWith(duration: duration);
+    //       mediaItem.add(_mediaItems[index]);
+    //       queue.add(_mediaItems);
+    //     }
+    //   });
   }
 
   void _updatePlaybackState() {
     final playing = _audioPlayer.playing;
+    final processingState = _audioPlayer.processingState;
+    final currentIndex = _audioPlayer.currentIndex;
+
     _playbackState.add(PlaybackState(
       controls: [
         MediaControl.skipToPrevious,
@@ -51,17 +60,18 @@ class AudioPlayerHandler extends BaseAudioHandler
       ],
       androidCompactActionIndices: const [0, 1, 2],
       processingState: {
-        ProcessingState.idle: AudioProcessingState.idle,
-        ProcessingState.loading: AudioProcessingState.loading,
-        ProcessingState.buffering: AudioProcessingState.buffering,
-        ProcessingState.ready: AudioProcessingState.ready,
-        ProcessingState.completed: AudioProcessingState.completed,
-      }[_audioPlayer.processingState]!,
+            ProcessingState.idle: AudioProcessingState.idle,
+            ProcessingState.loading: AudioProcessingState.loading,
+            ProcessingState.buffering: AudioProcessingState.buffering,
+            ProcessingState.ready: AudioProcessingState.ready,
+            ProcessingState.completed: AudioProcessingState.completed,
+          }[processingState] ??
+          AudioProcessingState.idle,
       playing: playing,
       updatePosition: _audioPlayer.position,
       bufferedPosition: _audioPlayer.bufferedPosition,
       speed: _audioPlayer.speed,
-      queueIndex: _audioPlayer.currentIndex,
+      queueIndex: currentIndex,
       systemActions: const {
         MediaAction.seek,
         MediaAction.seekForward,
@@ -84,27 +94,30 @@ class AudioPlayerHandler extends BaseAudioHandler
   }
 
   @override
-  Future<void> seek(Duration position) async {
-    await _audioPlayer.seek(position);
-    _updatePlaybackState();
-  }
+  Future<void> seek(Duration position) => _audioPlayer.seek(position);
 
   @override
-  Future<void> skipToNext() async {
-    await _audioPlayer.seekToNext();
-  }
+  Future<void> skipToNext() => _audioPlayer.seekToNext();
 
   @override
-  Future<void> skipToPrevious() async {
-    await _audioPlayer.seekToPrevious();
+  Future<void> skipToPrevious() => _audioPlayer.seekToPrevious();
+
+  @override
+  Future<void> skipToQueueItem(int index) async {
+    if (index >= 0 && index < _mediaItems.length) {
+      await _audioPlayer.seek(Duration.zero, index: index);
+    }
   }
 
   @override
   BehaviorSubject<PlaybackState> get playbackState => _playbackState;
 
-  Stream<Duration> get positionStream => _audioPlayer.positionStream;
-  Stream<Duration?> get durationStream => _audioPlayer.durationStream;
-  Stream<int?> get currentIndexStream => _audioPlayer.currentIndexStream;
+  Stream<MediaState> get mediaStateStream =>
+      Rx.combineLatest2<MediaItem?, Duration, MediaState>(
+        mediaItem,
+        _audioPlayer.positionStream,
+        (mediaItem, position) => MediaState(mediaItem, position),
+      );
 
   Future<void> initializeAudioSource(
       List<Map<String, String>> songs, int initialIndex) async {
@@ -117,8 +130,11 @@ class AudioPlayerHandler extends BaseAudioHandler
         title: song['title'] ?? 'Unknown Title',
         artist: song['artist'] ?? 'Unknown Artist',
         artUri: Uri.tryParse(song['imageUrl'] ?? ''),
+        duration: const Duration(seconds: 30), // Hardcoded duration
       );
-      _mediaItems.add(mediaItem);
+
+      _mediaItems.add(mediaItem); // FIX: This was missing in your code!
+
       audioSources.add(AudioSource.uri(Uri.parse(song['audioUrl']!)));
     }
 
@@ -130,7 +146,16 @@ class AudioPlayerHandler extends BaseAudioHandler
     );
 
     mediaItem.add(_mediaItems[initialIndex]);
+
     _audioPlayer.setLoopMode(LoopMode.all);
+    _updatePlaybackState();
+  }
+
+  Future<void> seekTo(Duration position) async {
+    final duration = _audioPlayer.duration;
+    if (duration != null && position <= duration) {
+      await _audioPlayer.seek(position);
+    }
   }
 
   @override

@@ -6,12 +6,13 @@ import 'package:i_tunes/widget/audio_handler.dart';
 class PlayScreen extends StatefulWidget {
   final List<Map<String, String>> songs;
   final int initialIndex;
+  final AudioPlayerHandler audioHandler;
 
   const PlayScreen({
     super.key,
     required this.songs,
     required this.initialIndex,
-    required AudioPlayerHandler audioHandler,
+    required this.audioHandler,
   });
 
   @override
@@ -19,66 +20,25 @@ class PlayScreen extends StatefulWidget {
 }
 
 class _PlayScreenState extends State<PlayScreen> {
-  final _audioHandler = AudioPlayerHandler();
-
-  late final ValueNotifier<int> _currentIndexNotifier =
-      ValueNotifier(widget.initialIndex);
-  Duration _progress = Duration.zero;
-  Duration _totalDuration = Duration.zero;
-  bool isPlaying = false;
-  bool _isUserSeeking = false;
+  late final AudioPlayerHandler _audioHandler;
 
   @override
   void initState() {
     super.initState();
+    _audioHandler = widget.audioHandler;
     _initializeAudio();
   }
 
   Future<void> _initializeAudio() async {
     await _audioHandler.initializeAudioSource(
         widget.songs, widget.initialIndex);
-    _setupListeners();
     await _audioHandler.play();
-  }
-
-  void _setupListeners() {
-    _audioHandler.currentIndexStream.listen((index) {
-      if (mounted && index != null && index < widget.songs.length) {
-        _currentIndexNotifier.value = index;
-      }
-    });
-
-    _audioHandler.durationStream.listen((duration) {
-      if (mounted && duration != null) {
-        setState(() => _totalDuration = duration);
-      }
-    });
-
-    _audioHandler.positionStream.listen((position) {
-      if (mounted && !_isUserSeeking) {
-        setState(() => _progress = position);
-      }
-    });
-
-    _audioHandler.playbackState.listen((state) {
-      if (mounted) {
-        final playing = state.playing &&
-            state.processingState != AudioProcessingState.completed;
-        setState(() => isPlaying = playing);
-      }
-    });
   }
 
   void _playNext() => _audioHandler.skipToNext();
   void _playPrevious() => _audioHandler.skipToPrevious();
-  void _togglePlayPause() =>
+  void _togglePlayPause(bool isPlaying) =>
       isPlaying ? _audioHandler.pause() : _audioHandler.play();
-
-  @override
-  void dispose() {
-    _currentIndexNotifier.dispose();
-    super.dispose();
-  }
 
   String _formatTime(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, "0");
@@ -89,9 +49,16 @@ class _PlayScreenState extends State<PlayScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<int>(
-      valueListenable: _currentIndexNotifier,
-      builder: (context, currentIndex, _) {
+    return StreamBuilder<MediaState>(
+      stream: _audioHandler.mediaStateStream,
+      builder: (context, snapshot) {
+        final mediaState = snapshot.data;
+        final mediaItem = mediaState?.mediaItem;
+        final position = mediaState?.position ?? Duration.zero;
+        final duration = mediaItem?.duration ?? const Duration(seconds: 30);
+
+        final currentIndex =
+            _audioHandler.audioPlayer.currentIndex ?? widget.initialIndex;
         final currentSong = widget.songs[currentIndex];
 
         return Scaffold(
@@ -103,10 +70,7 @@ class _PlayScreenState extends State<PlayScreen> {
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_ios_new_rounded,
                   color: Colors.black),
-              onPressed: () {
-                _audioHandler.pause();
-                Navigator.pop(context);
-              },
+              onPressed: () => Navigator.pop(context),
             ),
           ),
           body: Padding(
@@ -126,7 +90,7 @@ class _PlayScreenState extends State<PlayScreen> {
                     style: TextStyle(
                         fontSize: 18.sp, fontWeight: FontWeight.w400)),
                 SizedBox(height: 20.h),
-                _buildSlider(),
+                _buildSlider(position, duration),
                 SizedBox(height: 20.h),
                 _buildControls(),
               ],
@@ -159,12 +123,7 @@ class _PlayScreenState extends State<PlayScreen> {
             ? Image.network(
                 imageUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) =>
-                    _buildDefaultArtwork(),
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return _buildDefaultArtwork();
-                },
+                errorBuilder: (_, __, ___) => _buildDefaultArtwork(),
               )
             : _buildDefaultArtwork(),
       ),
@@ -178,60 +137,56 @@ class _PlayScreenState extends State<PlayScreen> {
     );
   }
 
-  Widget _buildSlider() {
+  Widget _buildSlider(Duration position, Duration duration) {
     return Row(
       children: [
-        Text(_formatTime(_progress),
-            style: const TextStyle(color: Colors.grey)),
+        Text(_formatTime(position), style: const TextStyle(color: Colors.grey)),
         Expanded(
           child: Slider(
-            value: _totalDuration.inMilliseconds > 0
-                ? _progress.inMilliseconds
-                    .toDouble()
-                    .clamp(0.0, _totalDuration.inMilliseconds.toDouble())
-                : 0.0,
+            value: position.inMilliseconds
+                .clamp(0, duration.inMilliseconds)
+                .toDouble(),
             min: 0.0,
-            max: _totalDuration.inMilliseconds > 0
-                ? _totalDuration.inMilliseconds.toDouble()
-                : 1.0,
-            onChangeStart: (_) => setState(() => _isUserSeeking = true),
-            onChanged: (value) => setState(
-                () => _progress = Duration(milliseconds: value.toInt())),
-            onChangeEnd: (value) async {
-              final newPosition = Duration(milliseconds: value.toInt());
-              await _audioHandler.seek(newPosition);
-              setState(() {
-                _progress = newPosition;
-                _isUserSeeking = false;
-              });
-            },
+            max: duration.inMilliseconds.toDouble(),
             activeColor: Colors.red,
             inactiveColor: Colors.grey[300],
+            onChanged: (double value) {
+              _audioHandler.seekTo(Duration(milliseconds: value.toInt()));
+            },
           ),
         ),
-        Text(_formatTime(_totalDuration),
-            style: const TextStyle(color: Colors.grey)),
+        Text(_formatTime(duration), style: const TextStyle(color: Colors.grey)),
       ],
     );
   }
 
   Widget _buildControls() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        IconButton(
-            icon: Icon(Icons.skip_previous, size: 35.w),
-            onPressed: _playPrevious),
-        IconButton(
-          icon: Icon(
-              isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill,
-              color: Colors.red,
-              size: 60.w),
-          onPressed: _togglePlayPause,
-        ),
-        IconButton(
-            icon: Icon(Icons.skip_next, size: 35.w), onPressed: _playNext),
-      ],
+    return StreamBuilder<PlaybackState>(
+      stream: _audioHandler.playbackState,
+      builder: (context, snapshot) {
+        final state = snapshot.data;
+        final isPlaying = state?.playing ?? false;
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            IconButton(
+                icon: Icon(Icons.skip_previous, size: 35.w),
+                onPressed: _playPrevious),
+            IconButton(
+              icon: Icon(
+                  isPlaying
+                      ? Icons.pause_circle_filled
+                      : Icons.play_circle_fill,
+                  color: Colors.red,
+                  size: 60.w),
+              onPressed: () => _togglePlayPause(isPlaying),
+            ),
+            IconButton(
+                icon: Icon(Icons.skip_next, size: 35.w), onPressed: _playNext),
+          ],
+        );
+      },
     );
   }
 }

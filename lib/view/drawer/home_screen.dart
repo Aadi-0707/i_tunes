@@ -52,14 +52,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
         songs = entries.map((json) => SongModel.fromJson(json)).toList();
 
-        // Sync playlist bookmarks to songs list
+        // Sync bookmarks
         for (var song in songs) {
-          if (isSongInPlaylist(song)) {
-            song.isBookmarked = true;
-          }
+          song.isBookmarked = playlist.any((p) => p.audioUrl == song.audioUrl);
         }
 
-        selectedSong = songs.first;
+        selectedSong = songs.isNotEmpty ? songs.first : null;
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -90,37 +88,32 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  bool isSongInPlaylist(SongModel song) {
-    return playlist.any((s) => s.audioUrl == song.audioUrl);
+  void togglePlaylist(SongModel song) async {
+    bool isInPlaylist = playlist.any((s) => s.audioUrl == song.audioUrl);
+
+    if (isInPlaylist) {
+      playlist.removeWhere((s) => s.audioUrl == song.audioUrl);
+      song.isBookmarked = false;
+      _showSnackBar('Removed from Playlist', Colors.red);
+    } else {
+      playlist.add(song);
+      song.isBookmarked = true;
+      _showSnackBar('Added to Playlist', Colors.green);
+    }
+
+    await savePlaylist();
+
+    setState(() {});
   }
 
-  void togglePlaylist(SongModel song) async {
-    setState(() {
-      if (isSongInPlaylist(song)) {
-        playlist.removeWhere((s) => s.audioUrl == song.audioUrl);
-        song.isBookmarked = false;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Removed from Playlist',
-                style: TextStyle(color: Colors.white)),
-            duration: Duration(seconds: 1),
-            backgroundColor: Colors.red,
-          ),
-        );
-      } else {
-        song.isBookmarked = true;
-        playlist.add(song);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Added to Playlist',
-                style: TextStyle(color: Colors.white)),
-            duration: Duration(seconds: 1),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    });
-    await savePlaylist();
+  void _showSnackBar(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: const TextStyle(color: Colors.white)),
+        duration: const Duration(seconds: 1),
+        backgroundColor: color,
+      ),
+    );
   }
 
   @override
@@ -146,7 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: ListView.builder(
                       itemCount: songs.length,
                       itemBuilder: (context, index) {
-                        return _buildSecondCard(songs[index], index);
+                        return _buildSongCard(songs[index], index);
                       },
                     ),
                   )
@@ -194,7 +187,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     setState(() {
                       playlist = updatedList;
                       for (var song in songs) {
-                        song.isBookmarked = isSongInPlaylist(song);
+                        song.isBookmarked =
+                            playlist.any((p) => p.audioUrl == song.audioUrl);
                       }
                     });
                     savePlaylist();
@@ -235,6 +229,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildFirstCard(SongModel song) {
     int songIndex = songs.indexOf(song);
+
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       decoration: BoxDecoration(
@@ -293,25 +288,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 IconButton(
                   icon: Icon(Icons.play_circle_fill,
                       color: Colors.white, size: 36.h),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PlayScreen(
-                          songs: songs
-                              .map((s) => {
-                                    'title': s.title,
-                                    'artist': s.artist,
-                                    'imageUrl': s.imageUrl,
-                                    'audioUrl': s.audioUrl,
-                                  })
-                              .toList(),
-                          initialIndex: songIndex,
-                          audioHandler: widget.audioHandler,
-                        ),
-                      ),
-                    );
-                  },
+                  onPressed: () => _navigateToPlayScreen(songIndex),
                 )
               ],
             ),
@@ -321,7 +298,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildSecondCard(SongModel song, int index) {
+  Widget _buildSongCard(SongModel song, int index) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
       decoration: BoxDecoration(
@@ -350,39 +327,39 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: Colors.white,
                     size: 26,
                   ),
-                  onPressed: () {
-                    togglePlaylist(song);
-                  },
+                  onPressed: () => togglePlaylist(song),
                 ),
                 IconButton(
                   icon: const Icon(Icons.play_arrow,
                       color: Colors.white, size: 26),
                   onPressed: () {
-                    setState(() {
-                      selectedSong = song;
-                    });
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PlayScreen(
-                          songs: songs
-                              .map((s) => {
-                                    'title': s.title,
-                                    'artist': s.artist,
-                                    'imageUrl': s.imageUrl,
-                                    'audioUrl': s.audioUrl,
-                                  })
-                              .toList(),
-                          initialIndex: index,
-                          audioHandler: widget.audioHandler,
-                        ),
-                      ),
-                    );
+                    setState(() => selectedSong = song);
+                    _navigateToPlayScreen(index);
                   },
                 ),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  void _navigateToPlayScreen(int index) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PlayScreen(
+          songs: songs
+              .map((s) => {
+                    'title': s.title,
+                    'artist': s.artist,
+                    'imageUrl': s.imageUrl,
+                    'audioUrl': s.audioUrl,
+                  })
+              .toList(),
+          initialIndex: index,
+          audioHandler: widget.audioHandler,
         ),
       ),
     );

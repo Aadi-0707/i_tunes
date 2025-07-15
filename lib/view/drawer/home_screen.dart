@@ -48,13 +48,18 @@ class _HomeScreenState extends State<HomeScreen> {
       if (response.statusCode == 200) {
         final data =
             response.data is String ? jsonDecode(response.data) : response.data;
-
         final List<dynamic> entries = data['feed']['entry'];
 
-        setState(() {
-          songs = entries.map((json) => SongModel.fromJson(json)).toList();
-          selectedSong = songs.first;
-        });
+        songs = entries.map((json) => SongModel.fromJson(json)).toList();
+
+        // Sync playlist bookmarks to songs list
+        for (var song in songs) {
+          if (isSongInPlaylist(song)) {
+            song.isBookmarked = true;
+          }
+        }
+
+        selectedSong = songs.first;
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -78,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
     List<String>? songList = prefs.getStringList('playlist');
     if (songList != null && songList.isNotEmpty) {
       playlist = songList
-          .map((songString) => SongModel.fromJson(jsonDecode(songString)))
+          .map((songString) => SongModel.fromLocalJson(jsonDecode(songString)))
           .toList();
     } else {
       playlist = [];
@@ -93,6 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       if (isSongInPlaylist(song)) {
         playlist.removeWhere((s) => s.audioUrl == song.audioUrl);
+        song.isBookmarked = false;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Removed from Playlist',
@@ -102,6 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         );
       } else {
+        song.isBookmarked = true;
         playlist.add(song);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -186,6 +193,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPlaylistChanged: (updatedList) {
                     setState(() {
                       playlist = updatedList;
+                      for (var song in songs) {
+                        song.isBookmarked = isSongInPlaylist(song);
+                      }
                     });
                     savePlaylist();
                   },
@@ -289,11 +299,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       MaterialPageRoute(
                         builder: (context) => PlayScreen(
                           songs: songs
-                              .map((song) => {
-                                    'title': song.title,
-                                    'artist': song.artist,
-                                    'imageUrl': song.imageUrl,
-                                    'audioUrl': song.audioUrl,
+                              .map((s) => {
+                                    'title': s.title,
+                                    'artist': s.artist,
+                                    'imageUrl': s.imageUrl,
+                                    'audioUrl': s.audioUrl,
                                   })
                               .toList(),
                           initialIndex: songIndex,
@@ -326,9 +336,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
           child: ListTile(
-            leading: CircleAvatar(
-              backgroundImage: NetworkImage(song.imageUrl),
-            ),
+            leading: CircleAvatar(backgroundImage: NetworkImage(song.imageUrl)),
             title:
                 Text(song.title, style: const TextStyle(color: Colors.white)),
             subtitle: Text(song.artist,
@@ -338,9 +346,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 IconButton(
                   icon: Icon(
-                    isSongInPlaylist(song)
-                        ? Icons.bookmark
-                        : Icons.bookmark_border,
+                    song.isBookmarked ? Icons.bookmark : Icons.bookmark_border,
                     color: Colors.white,
                     size: 26,
                   ),
@@ -360,11 +366,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       MaterialPageRoute(
                         builder: (context) => PlayScreen(
                           songs: songs
-                              .map((song) => {
-                                    'title': song.title,
-                                    'artist': song.artist,
-                                    'imageUrl': song.imageUrl,
-                                    'audioUrl': song.audioUrl,
+                              .map((s) => {
+                                    'title': s.title,
+                                    'artist': s.artist,
+                                    'imageUrl': s.imageUrl,
+                                    'audioUrl': s.audioUrl,
                                   })
                               .toList(),
                           initialIndex: index,

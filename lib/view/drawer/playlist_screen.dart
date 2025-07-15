@@ -35,7 +35,6 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
       playlistSongs.removeWhere((element) => isSameSong(element, song));
     });
 
-    // Also update the isBookmarked flag for the removed song
     song.isBookmarked = false;
 
     widget.onPlaylistChanged(playlistSongs);

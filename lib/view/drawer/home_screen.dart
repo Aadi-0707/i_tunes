@@ -348,31 +348,34 @@ class _HomeScreenState extends State<HomeScreen> {
                     togglePlaylist(song);
                   },
                 ),
-                const Icon(Icons.play_arrow, color: Colors.white, size: 26),
+                IconButton(
+                  icon: const Icon(Icons.play_arrow,
+                      color: Colors.white, size: 26),
+                  onPressed: () {
+                    setState(() {
+                      selectedSong = song;
+                    });
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PlayScreen(
+                          songs: songs
+                              .map((song) => {
+                                    'title': song.title,
+                                    'artist': song.artist,
+                                    'imageUrl': song.imageUrl,
+                                    'audioUrl': song.audioUrl,
+                                  })
+                              .toList(),
+                          initialIndex: index,
+                          audioHandler: widget.audioHandler,
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
-            onTap: () {
-              setState(() {
-                selectedSong = song;
-              });
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => PlayScreen(
-                    songs: songs
-                        .map((song) => {
-                              'title': song.title,
-                              'artist': song.artist,
-                              'imageUrl': song.imageUrl,
-                              'audioUrl': song.audioUrl,
-                            })
-                        .toList(),
-                    initialIndex: index,
-                    audioHandler: widget.audioHandler,
-                  ),
-                ),
-              );
-            },
           ),
         ),
       ),

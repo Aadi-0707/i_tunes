@@ -93,8 +93,24 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       if (isSongInPlaylist(song)) {
         playlist.removeWhere((s) => s.audioUrl == song.audioUrl);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Removed from Playlist',
+                style: TextStyle(color: Colors.white)),
+            duration: Duration(seconds: 1),
+            backgroundColor: Colors.red,
+          ),
+        );
       } else {
         playlist.add(song);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Added to Playlist',
+                style: TextStyle(color: Colors.white)),
+            duration: Duration(seconds: 1),
+            backgroundColor: Colors.green,
+          ),
+        );
       }
     });
     await savePlaylist();

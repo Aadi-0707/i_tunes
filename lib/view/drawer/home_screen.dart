@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:i_tunes/models/all_models.dart';
 import 'package:i_tunes/view/drawer/feedback_screen.dart';
+import 'package:i_tunes/view/drawer/local_song.dart';
 import 'package:i_tunes/view/song%20player/play_screen.dart';
 import 'package:marquee/marquee.dart';
 import 'package:i_tunes/view/drawer/playlist_screen.dart';
@@ -198,6 +199,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             );
           }),
+          _buildDrawerTile(Icons.folder, 'Local', () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => LocalSongScreen()),
+            );
+          }),
           _buildDrawerTile(Icons.feedback, 'Feedback', () {
             Navigator.push(
               context,
@@ -280,7 +287,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     subtitle: Text(
                       song.artist,
                       style: const TextStyle(color: Colors.white70),
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -314,10 +321,14 @@ class _HomeScreenState extends State<HomeScreen> {
           filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
           child: ListTile(
             leading: CircleAvatar(backgroundImage: NetworkImage(song.imageUrl)),
-            title:
-                Text(song.title, style: const TextStyle(color: Colors.white)),
+            title: Text(song.title,
+                style: const TextStyle(color: Colors.white),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis),
             subtitle: Text(song.artist,
-                style: const TextStyle(color: Colors.white70)),
+                style: const TextStyle(color: Colors.white70),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [

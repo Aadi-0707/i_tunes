@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:i_tunes/view/drawer/home_screen.dart';
 import 'package:i_tunes/widget/audio_handler.dart';
-import 'package:i_tunes/widget/splash_screen/dot.dart';
-import 'package:i_tunes/widget/splash_screen/next_arrow.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:i_tunes/widget/splash_screen_widget/dot.dart';
+import 'package:i_tunes/widget/splash_screen_widget/next_arrow.dart';
 
 class SplashScreen extends StatefulWidget {
   final AudioPlayerHandler audioHandler;

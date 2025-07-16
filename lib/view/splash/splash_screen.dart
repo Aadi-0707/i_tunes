@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:i_tunes/view/drawer/home_screen.dart';
-import 'package:i_tunes/widget/audio_handler.dart';
+import 'package:i_tunes/view/Song_Player/audio_handler.dart';
+import 'package:i_tunes/view/Splash/Widget/dot.dart';
+import 'package:i_tunes/view/Splash/Widget/next_arrow.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:i_tunes/widget/splash_screen_widget/dot.dart';
-import 'package:i_tunes/widget/splash_screen_widget/next_arrow.dart';
+import 'package:i_tunes/view/bottom_bar.dart';
 
 class SplashScreen extends StatefulWidget {
   final AudioPlayerHandler audioHandler;
@@ -32,7 +32,7 @@ class _SplashScreenState extends State<SplashScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-            builder: (_) => HomeScreen(audioHandler: widget.audioHandler)),
+            builder: (_) => BottomBar(audioHandler: widget.audioHandler)),
       );
     }
   }

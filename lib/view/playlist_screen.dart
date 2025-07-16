@@ -2,8 +2,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:i_tunes/models/all_models.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:i_tunes/view/song%20player/play_screen.dart';
-import 'package:i_tunes/widget/audio_handler.dart';
+import 'package:i_tunes/view/Song_Player/audio_handler.dart';
+import 'package:i_tunes/view/Song_Player/play_screen.dart';
 
 class PlaylistScreen extends StatefulWidget {
   final List<SongModel> playlistSongs;

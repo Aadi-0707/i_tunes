@@ -4,13 +4,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:i_tunes/models/all_models.dart';
-import 'package:i_tunes/view/drawer/feedback_screen.dart';
-import 'package:i_tunes/view/drawer/local_song.dart';
-import 'package:i_tunes/view/song%20player/play_screen.dart';
+import 'package:i_tunes/view/Song_Player/audio_handler.dart';
+import 'package:i_tunes/view/Song_Player/play_screen.dart';
 import 'package:marquee/marquee.dart';
-import 'package:i_tunes/view/drawer/playlist_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:i_tunes/widget/audio_handler.dart';
 
 class HomeScreen extends StatefulWidget {
   final AudioPlayerHandler audioHandler;
@@ -53,7 +50,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
         songs = entries.map((json) => SongModel.fromJson(json)).toList();
 
-        // Sync bookmarks
         for (var song in songs) {
           song.isBookmarked = playlist.any((p) => p.audioUrl == song.audioUrl);
         }
@@ -121,7 +117,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.redAccent[50],
-      drawer: _buildDrawer(),
       body: Padding(
         padding: EdgeInsets.only(top: 60.w),
         child: isLoading
@@ -146,90 +141,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   )
                 ],
               ),
-      ),
-    );
-  }
-
-  Widget _buildDrawer() {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          DrawerHeader(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/music_bg.png'),
-                fit: BoxFit.cover,
-              ),
-            ),
-            child: ListTile(
-              title: Text('iTunes',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 28.sp,
-                      color: Colors.white)),
-              subtitle: Text('Menu',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 22.sp,
-                      color: Colors.white)),
-            ),
-          ),
-          _buildDrawerTile(Icons.music_note, 'Home', () {
-            Navigator.pop(context);
-          }),
-          _buildDrawerTile(Icons.queue_music, 'Playlist', () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => PlaylistScreen(
-                  playlistSongs: playlist,
-                  onPlaylistChanged: (updatedList) {
-                    setState(() {
-                      playlist = updatedList;
-                      for (var song in songs) {
-                        song.isBookmarked =
-                            playlist.any((p) => p.audioUrl == song.audioUrl);
-                      }
-                    });
-                    savePlaylist();
-                  },
-                  audioHandler: widget.audioHandler,
-                ),
-              ),
-            );
-          }),
-          _buildDrawerTile(Icons.folder, 'Local', () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => LocalSongScreen()),
-            );
-          }),
-          _buildDrawerTile(Icons.feedback, 'Feedback', () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => FeedbackScreen()),
-            );
-          }),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDrawerTile(IconData icon, String title, VoidCallback onTap) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
-      decoration: BoxDecoration(
-        image: const DecorationImage(
-          image: AssetImage('assets/images/music_bg.png'),
-          fit: BoxFit.cover,
-        ),
-        borderRadius: BorderRadius.circular(8.r),
-      ),
-      child: ListTile(
-        leading: Icon(icon, color: Colors.white),
-        title: Text(title, style: const TextStyle(color: Colors.white)),
-        onTap: onTap,
       ),
     );
   }

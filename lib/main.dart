@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:i_tunes/view/splash/splash_screen.dart';
+import 'package:i_tunes/view/Song_Player/audio_handler.dart';
 import 'package:audio_service/audio_service.dart';
-import 'package:i_tunes/widget/audio_handler.dart';
+import 'package:i_tunes/view/splash/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

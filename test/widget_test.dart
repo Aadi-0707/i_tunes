@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:i_tunes/main.dart';
-import 'package:i_tunes/widget/audio_handler.dart';
+import 'package:i_tunes/view/Song_Player/audio_handler.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {

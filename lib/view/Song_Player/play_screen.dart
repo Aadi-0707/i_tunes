@@ -1,7 +1,7 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:i_tunes/widget/audio_handler.dart';
+import 'package:i_tunes/view/Song_Player/audio_handler.dart';
 
 class PlayScreen extends StatefulWidget {
   final List<Map<String, String>> songs;
@@ -19,14 +19,27 @@ class PlayScreen extends StatefulWidget {
   State<PlayScreen> createState() => _PlayScreenState();
 }
 
-class _PlayScreenState extends State<PlayScreen> {
+class _PlayScreenState extends State<PlayScreen>
+    with SingleTickerProviderStateMixin {
   late final AudioPlayerHandler _audioHandler;
+  late AnimationController _rotationController;
 
   @override
   void initState() {
     super.initState();
     _audioHandler = widget.audioHandler;
+    _rotationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 20),
+    )..repeat();
+
     _initializeAudio();
+  }
+
+  @override
+  void dispose() {
+    _rotationController.dispose();
+    super.dispose();
   }
 
   Future<void> _initializeAudio() async {
@@ -78,17 +91,25 @@ class _PlayScreenState extends State<PlayScreen> {
             child: Column(
               children: [
                 SizedBox(height: 30.h),
-                _buildArtwork(currentSong),
+                _buildArtwork(currentSong, _audioHandler.audioPlayer.playing),
                 SizedBox(height: 30.h),
-                Text(currentSong['title'] ?? 'Unknown Title',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 22.sp, fontWeight: FontWeight.bold)),
+                Text(
+                  currentSong['title'] ?? 'Unknown Title',
+                  textAlign: TextAlign.center,
+                  style:
+                      TextStyle(fontSize: 22.sp, fontWeight: FontWeight.bold),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 SizedBox(height: 4.h),
-                Text(currentSong['artist'] ?? 'Unknown Artist',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 18.sp, fontWeight: FontWeight.w400)),
+                Text(
+                  currentSong['artist'] ?? 'Unknown Artist',
+                  textAlign: TextAlign.center,
+                  style:
+                      TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w400),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 SizedBox(height: 20.h),
                 _buildSlider(position, duration),
                 SizedBox(height: 20.h),
@@ -101,31 +122,45 @@ class _PlayScreenState extends State<PlayScreen> {
     );
   }
 
-  Widget _buildArtwork(Map<String, String> currentSong) {
+  Widget _buildArtwork(Map<String, String> currentSong, bool isPlaying) {
     final imageUrl = currentSong['imageUrl'] ?? '';
 
-    return Container(
-      height: 350,
-      width: 350,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(340.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(128),
-            blurRadius: 20.r,
-            offset: Offset(0, 15.h),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(340.r),
-        child: imageUrl.isNotEmpty
-            ? Image.network(
-                imageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _buildDefaultArtwork(),
-              )
-            : _buildDefaultArtwork(),
+    if (isPlaying) {
+      _rotationController.repeat();
+    } else {
+      _rotationController.stop();
+    }
+
+    return AnimatedBuilder(
+      animation: _rotationController,
+      builder: (_, child) {
+        return Transform.rotate(
+          angle: _rotationController.value * 2 * 3.1415926,
+          child: child,
+        );
+      },
+      child: Container(
+        height: 350,
+        width: 350,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(340.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(128),
+              blurRadius: 20.r,
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(340.r),
+          child: imageUrl.isNotEmpty
+              ? Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => _buildDefaultArtwork(),
+                )
+              : _buildDefaultArtwork(),
+        ),
       ),
     );
   }

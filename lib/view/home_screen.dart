@@ -73,22 +73,23 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void togglePlaylist(SongModel song) async {
-    bool isInPlaylist = widget.playlist.any((s) => s.audioUrl == song.audioUrl);
-
     List<SongModel> updatedList = List.from(widget.playlist);
 
+    bool isInPlaylist = updatedList.any((s) => s.audioUrl == song.audioUrl);
+
     if (isInPlaylist) {
+      // Remove from playlist
       updatedList.removeWhere((s) => s.audioUrl == song.audioUrl);
       song.isBookmarked = false;
       _showSnackBar('Removed from Playlist', Colors.red);
     } else {
+      // Add to playlist
       updatedList.add(song);
       song.isBookmarked = true;
       _showSnackBar('Added to Playlist', Colors.green);
     }
 
     widget.onPlaylistChanged(updatedList);
-
     await savePlaylist(updatedList);
 
     setState(() {});

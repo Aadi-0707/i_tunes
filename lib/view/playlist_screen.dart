@@ -32,11 +32,11 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
 
   void removeFromPlaylist(SongModel song) {
     setState(() {
-      playlistSongs.removeWhere((element) => isSameSong(element, song));
+      playlistSongs.removeWhere((element) => element.audioUrl == song.audioUrl);
       song.isBookmarked = false;
     });
 
-    widget.onPlaylistChanged(playlistSongs);
+    widget.onPlaylistChanged(List.from(playlistSongs));
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -48,7 +48,15 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
     );
   }
 
-  bool isSameSong(SongModel a, SongModel b) => a.audioUrl == b.audioUrl;
+  @override
+  void didUpdateWidget(covariant PlaylistScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.playlistSongs != widget.playlistSongs) {
+      setState(() {
+        playlistSongs = List.from(widget.playlistSongs);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,9 +110,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                             IconButton(
                               icon: const Icon(Icons.play_arrow,
                                   color: Colors.white, size: 26),
-                              onPressed: () {
-                                _openPlayer(index);
-                              },
+                              onPressed: () => _openPlayer(index),
                             ),
                           ],
                         ),

@@ -11,8 +11,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   final AudioPlayerHandler audioHandler;
+  final List<SongModel> playlist;
+  final Function(List<SongModel>) onPlaylistChanged;
 
-  const HomeScreen({super.key, required this.audioHandler});
+  const HomeScreen({
+    super.key,
+    required this.audioHandler,
+    required this.playlist,
+    required this.onPlaylistChanged,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -21,7 +28,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool isLoading = true;
   List<SongModel> songs = [];
-  List<SongModel> playlist = [];
   SongModel? selectedSong;
 
   @override
@@ -32,7 +38,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _initializeData() async {
     setState(() => isLoading = true);
-    await loadPlaylist();
     await fetchSongs();
     setState(() => isLoading = false);
   }
@@ -51,7 +56,8 @@ class _HomeScreenState extends State<HomeScreen> {
         songs = entries.map((json) => SongModel.fromJson(json)).toList();
 
         for (var song in songs) {
-          song.isBookmarked = playlist.any((p) => p.audioUrl == song.audioUrl);
+          song.isBookmarked =
+              widget.playlist.any((p) => p.audioUrl == song.audioUrl);
         }
 
         selectedSong = songs.isNotEmpty ? songs.first : null;
@@ -66,41 +72,33 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> savePlaylist() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> songList =
-        playlist.map((song) => jsonEncode(song.toJson())).toList();
-    await prefs.setStringList('playlist', songList);
-  }
-
-  Future<void> loadPlaylist() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String>? songList = prefs.getStringList('playlist');
-    if (songList != null && songList.isNotEmpty) {
-      playlist = songList
-          .map((songString) => SongModel.fromLocalJson(jsonDecode(songString)))
-          .toList();
-    } else {
-      playlist = [];
-    }
-  }
-
   void togglePlaylist(SongModel song) async {
-    bool isInPlaylist = playlist.any((s) => s.audioUrl == song.audioUrl);
+    bool isInPlaylist = widget.playlist.any((s) => s.audioUrl == song.audioUrl);
+
+    List<SongModel> updatedList = List.from(widget.playlist);
 
     if (isInPlaylist) {
-      playlist.removeWhere((s) => s.audioUrl == song.audioUrl);
+      updatedList.removeWhere((s) => s.audioUrl == song.audioUrl);
       song.isBookmarked = false;
       _showSnackBar('Removed from Playlist', Colors.red);
     } else {
-      playlist.add(song);
+      updatedList.add(song);
       song.isBookmarked = true;
       _showSnackBar('Added to Playlist', Colors.green);
     }
 
-    await savePlaylist();
+    widget.onPlaylistChanged(updatedList);
+
+    await savePlaylist(updatedList);
 
     setState(() {});
+  }
+
+  Future<void> savePlaylist(List<SongModel> playlist) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> songList =
+        playlist.map((song) => jsonEncode(song.toJson())).toList();
+    await prefs.setStringList('playlist', songList);
   }
 
   void _showSnackBar(String message, Color color) {

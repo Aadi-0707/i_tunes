@@ -33,7 +33,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
   void removeFromPlaylist(SongModel song) {
     setState(() {
       playlistSongs.removeWhere((element) => isSameSong(element, song));
-      song.isBookmarked = false; // Update model
+      song.isBookmarked = false;
     });
 
     widget.onPlaylistChanged(playlistSongs);

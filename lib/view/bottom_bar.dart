@@ -71,13 +71,13 @@ class _BottomBarState extends State<BottomBar> {
       body: IndexedStack(index: _currentIndex, children: screens),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.red,
+        type: BottomNavigationBarType.shifting,
+        selectedItemColor: const Color.fromRGBO(175, 25, 14, 1),
         unselectedItemColor: Colors.grey,
-        backgroundColor: Colors.redAccent[50],
+        backgroundColor: Colors.redAccent,
         onTap: (index) => setState(() => _currentIndex = index),
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.music_note), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.music_note), label: 'Songs'),
           BottomNavigationBarItem(
               icon: Icon(Icons.queue_music), label: 'Playlist'),
           BottomNavigationBarItem(icon: Icon(Icons.folder), label: 'Local'),

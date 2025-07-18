@@ -65,8 +65,8 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
       appBar: AppBar(
         backgroundColor: Colors.redAccent[50],
         elevation: 0,
-        title: const Text('My Playlist', style: TextStyle(color: Colors.black)),
-        iconTheme: const IconThemeData(color: Colors.black),
+        title:
+            const Text(' My Playlist', style: TextStyle(color: Colors.black)),
       ),
       body: playlistSongs.isEmpty
           ? const Center(
@@ -96,9 +96,13 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                           backgroundImage: NetworkImage(song.imageUrl),
                         ),
                         title: Text(song.title,
-                            style: const TextStyle(color: Colors.white)),
+                            style: const TextStyle(color: Colors.white),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis),
                         subtitle: Text(song.artist,
-                            style: const TextStyle(color: Colors.white70)),
+                            style: const TextStyle(color: Colors.white70),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [

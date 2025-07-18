@@ -71,12 +71,7 @@ class _FeedbackScreenState extends State<FeedbackScreen>
       appBar: AppBar(
         backgroundColor: Colors.redAccent[50],
         elevation: 0,
-        title: const Text('Feedback', style: TextStyle(color: Colors.black)),
-        leading: IconButton(
-          icon:
-              const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
+        title: const Text('  Feedback', style: TextStyle(color: Colors.black)),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.w),

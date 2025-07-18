@@ -116,8 +116,13 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.redAccent[50],
+      appBar: AppBar(
+        backgroundColor: Colors.redAccent[50],
+        elevation: 0,
+        title: const Text('Home', style: TextStyle(color: Colors.black)),
+      ),
       body: Padding(
-        padding: EdgeInsets.only(top: 60.w),
+        padding: EdgeInsets.only(top: 10.w),
         child: isLoading
             ? const Center(child: CircularProgressIndicator())
             : Column(

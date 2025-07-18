@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:i_tunes/models/all_models.dart';
 import 'package:i_tunes/view/Song_Player/audio_handler.dart';
 import 'package:i_tunes/view/feedback_screen.dart';
 import 'package:i_tunes/view/home_screen.dart';
@@ -16,14 +17,25 @@ class BottomBar extends StatefulWidget {
 
 class _BottomAppBarState extends State<BottomBar> {
   int _currentIndex = 0;
+  List<SongModel> _playlist = [];
+
+  void _updatePlaylist(List<SongModel> newList) {
+    setState(() {
+      _playlist = newList;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final screens = [
-      HomeScreen(audioHandler: widget.audioHandler),
+      HomeScreen(
+        audioHandler: widget.audioHandler,
+        playlist: _playlist,
+        onPlaylistChanged: _updatePlaylist,
+      ),
       PlaylistScreen(
-        playlistSongs: const [],
-        onPlaylistChanged: (list) {},
+        playlistSongs: _playlist,
+        onPlaylistChanged: _updatePlaylist,
         audioHandler: widget.audioHandler,
       ),
       LocalSongScreen(),

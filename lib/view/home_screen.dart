@@ -6,7 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:i_tunes/models/all_models.dart';
 import 'package:i_tunes/view/Song_Player/audio_handler.dart';
 import 'package:i_tunes/view/Song_Player/play_screen.dart';
-import 'package:marquee/marquee.dart';
+// import 'package:marquee/marquee.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -29,6 +29,20 @@ class _HomeScreenState extends State<HomeScreen> {
   bool isLoading = true;
   List<SongModel> songs = [];
   SongModel? selectedSong;
+  List<SongModel> filteredSongs = [];
+  String selectedCategory = 'All';
+
+  List<String> categories = [
+    'All',
+    'Punjabi',
+    'Gujarati',
+    'Hindi',
+    'English',
+    'Lofi',
+    'Drive',
+    'Relax',
+    'Party'
+  ];
 
   @override
   void initState() {
@@ -78,12 +92,10 @@ class _HomeScreenState extends State<HomeScreen> {
     bool isInPlaylist = updatedList.any((s) => s.audioUrl == song.audioUrl);
 
     if (isInPlaylist) {
-      // Remove from playlist
       updatedList.removeWhere((s) => s.audioUrl == song.audioUrl);
       song.isBookmarked = false;
       _showSnackBar('Removed from Playlist', Colors.red);
     } else {
-      // Add to playlist
       updatedList.add(song);
       song.isBookmarked = true;
       _showSnackBar('Added to Playlist', Colors.green);
@@ -112,111 +124,130 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void filterSongs(String category) {
+    setState(() {
+      selectedCategory = category;
+      if (category == 'All') {
+        filteredSongs = List.from(songs);
+      } else {
+        filteredSongs = songs.where((song) {
+          return song.title.toLowerCase().contains(category.toLowerCase()) ||
+              song.artist.toLowerCase().contains(category.toLowerCase());
+        }).toList();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.redAccent[50],
-      appBar: AppBar(
-        backgroundColor: Colors.redAccent[50],
-        elevation: 0,
-        title: const Text('Home', style: TextStyle(color: Colors.black)),
-      ),
-      body: Padding(
-        padding: EdgeInsets.only(top: 10.w),
-        child: isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : Column(
-                children: [
-                  if (selectedSong != null) _buildFirstCard(selectedSong!),
-                  SizedBox(height: 20.h),
-                  Text('TOP 20 Songs',
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16.sp)),
-                  SizedBox(height: 5.h),
-                  Expanded(
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : CustomScrollView(
+              slivers: [
+                // Header - Scrolls with content
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                        top: 30.h, left: 16.w, right: 16.w, bottom: 12.h),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: const [
+                            Icon(Icons.music_note,
+                                color: Colors.black, size: 28),
+                            SizedBox(width: 10),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Welcome,',
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(height: 2),
+                                Text(
+                                  'iTunes Music',
+                                  style: TextStyle(
+                                      color: Color.fromARGB(255, 127, 118, 118),
+                                      fontSize: 14),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        Icon(Icons.search, color: Colors.black, size: 28),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Categories - Pinned at top
+                SliverAppBar(
+                  pinned: true,
+                  backgroundColor: Colors.redAccent[50],
+                  toolbarHeight: 40.h,
+                  automaticallyImplyLeading: false,
+                  title: SizedBox(
+                    height: 30.h,
                     child: ListView.builder(
-                      itemCount: songs.length,
+                      scrollDirection: Axis.horizontal,
+                      itemCount: categories.length,
                       itemBuilder: (context, index) {
-                        return _buildSongCard(songs[index], index);
+                        String category = categories[index];
+                        bool isSelected = category == selectedCategory;
+
+                        return GestureDetector(
+                          onTap: () => filterSongs(category),
+                          child: Container(
+                            margin: EdgeInsets.only(right: 10.w),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 14.w, vertical: 3.h),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? const Color.fromARGB(255, 183, 36, 23)
+                                  : Colors.black45,
+                              borderRadius: BorderRadius.circular(15.r),
+                            ),
+                            child: Center(
+                              child: Text(
+                                category,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12.sp,
+                                  fontWeight: isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
                       },
                     ),
-                  )
-                ],
-              ),
-      ),
-    );
-  }
-
-  Widget _buildFirstCard(SongModel song) {
-    int songIndex = songs.indexOf(song);
-
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16.r),
-        image: const DecorationImage(
-          image: AssetImage('assets/images/music_bg.png'),
-          fit: BoxFit.cover,
-        ),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16.r),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
-          child: Padding(
-            padding: EdgeInsets.all(15.w),
-            child: Row(
-              children: [
-                Hero(
-                  tag: 'albumArt',
-                  child: Container(
-                    height: 100,
-                    width: 100,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(90.r),
-                      image: DecorationImage(
-                        image: NetworkImage(song.imageUrl),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
                   ),
                 ),
-                Expanded(
-                  child: ListTile(
-                    title: SizedBox(
-                      height: 25.h,
-                      child: Marquee(
-                        text: song.title,
-                        style: TextStyle(
-                            fontSize: 22.sp,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white),
-                        blankSpace: 80.0,
-                        velocity: 40.0,
-                        pauseAfterRound: const Duration(seconds: 0),
-                        startPadding: 10.0,
-                      ),
-                    ),
-                    subtitle: Text(
-                      song.artist,
-                      style: const TextStyle(color: Colors.white70),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+
+                // Song List
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      SongModel song = selectedCategory == 'All'
+                          ? songs[index]
+                          : filteredSongs[index];
+                      return _buildSongCard(song, index);
+                    },
+                    childCount: selectedCategory == 'All'
+                        ? songs.length
+                        : filteredSongs.length,
                   ),
                 ),
-                IconButton(
-                  icon: Icon(Icons.play_circle_fill,
-                      color: Colors.white, size: 36.h),
-                  onPressed: () => _navigateToPlayScreen(songIndex),
-                )
               ],
             ),
-          ),
-        ),
-      ),
     );
   }
 

@@ -81,9 +81,9 @@ class _PlayScreenState extends State<PlayScreen>
             elevation: 0,
             title: const Text('Playing', style: TextStyle(color: Colors.black)),
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                  color: Colors.black),
-              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.keyboard_arrow_down_rounded,
+                  size: 35, color: Colors.black),
+              onPressed: () {},
             ),
           ),
           body: Padding(

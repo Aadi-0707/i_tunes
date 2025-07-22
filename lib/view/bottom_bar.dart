@@ -120,6 +120,7 @@ class _BottomBarState extends State<BottomBar> {
               initialIndex: 0,
               audioHandler: widget.audioHandler,
               onMinimize: _updateMiniPlayer,
+              isFromMiniPlayer: true, // Prevent reinit
             ),
           ),
         );
@@ -135,8 +136,8 @@ class _BottomBarState extends State<BottomBar> {
                 borderRadius: BorderRadius.circular(8.r),
                 child: Image.network(
                   _currentSong!['imageUrl']!,
-                  height: 50.h,
-                  width: 50.w,
+                  height: 30.h,
+                  width: 30.w,
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) =>
                       const Icon(Icons.music_note, size: 40),
@@ -167,7 +168,7 @@ class _BottomBarState extends State<BottomBar> {
             IconButton(
               icon: Icon(
                 _isPlaying ? Icons.pause : Icons.play_arrow,
-                size: 30.w,
+                size: 22.w,
                 color: Colors.red,
               ),
               onPressed: () {

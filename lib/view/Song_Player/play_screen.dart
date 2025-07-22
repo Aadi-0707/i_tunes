@@ -8,6 +8,7 @@ class PlayScreen extends StatefulWidget {
   final int initialIndex;
   final AudioPlayerHandler audioHandler;
   final Function(Map<String, String> currentSong, bool isPlaying) onMinimize;
+  final bool isFromMiniPlayer;
 
   const PlayScreen({
     super.key,
@@ -15,6 +16,7 @@ class PlayScreen extends StatefulWidget {
     required this.initialIndex,
     required this.audioHandler,
     required this.onMinimize,
+    this.isFromMiniPlayer = false,
   });
 
   @override
@@ -35,7 +37,9 @@ class _PlayScreenState extends State<PlayScreen>
       duration: const Duration(seconds: 20),
     )..repeat();
 
-    _initializeAudio();
+    if (!widget.isFromMiniPlayer) {
+      _initializeAudio();
+    }
   }
 
   @override

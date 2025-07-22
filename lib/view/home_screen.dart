@@ -169,7 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               Text(
                                 'Welcome,',
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: Colors.black,
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -178,7 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               Text(
                                 'iTunes Music',
                                 style: TextStyle(
-                                  color: Color.fromARGB(230, 255, 255, 255),
+                                  color: Colors.black,
                                   fontSize: 14,
                                 ),
                               ),
@@ -186,7 +186,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ],
                       ),
-                      const Icon(Icons.search, color: Colors.white, size: 28),
+                      const Icon(Icons.search, color: Colors.black, size: 28),
                     ],
                   ),
                 ),

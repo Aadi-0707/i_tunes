@@ -9,12 +9,14 @@ class PlaylistScreen extends StatefulWidget {
   final List<SongModel> playlistSongs;
   final Function(List<SongModel>) onPlaylistChanged;
   final AudioPlayerHandler audioHandler;
+  final Function(Map<String, String>, bool) onMinimize;
 
   const PlaylistScreen({
     super.key,
     required this.playlistSongs,
     required this.onPlaylistChanged,
     required this.audioHandler,
+    required this.onMinimize,
   });
 
   @override
@@ -92,8 +94,11 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                     child: BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
                       child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: NetworkImage(song.imageUrl),
+                        leading: Hero(
+                          tag: 'artwork_${song.audioUrl}',
+                          child: CircleAvatar(
+                            backgroundImage: NetworkImage(song.imageUrl),
+                          ),
                         ),
                         title: Text(song.title,
                             style: const TextStyle(color: Colors.white),
@@ -142,6 +147,9 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
               .toList(),
           initialIndex: index,
           audioHandler: widget.audioHandler,
+          onMinimize: (currentSong, isPlaying) {
+            widget.onMinimize(currentSong, isPlaying);
+          },
         ),
       ),
     );

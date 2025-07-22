@@ -7,12 +7,14 @@ class PlayScreen extends StatefulWidget {
   final List<Map<String, String>> songs;
   final int initialIndex;
   final AudioPlayerHandler audioHandler;
+  final Function(Map<String, String> currentSong, bool isPlaying) onMinimize;
 
   const PlayScreen({
     super.key,
     required this.songs,
     required this.initialIndex,
     required this.audioHandler,
+    required this.onMinimize,
   });
 
   @override
@@ -83,7 +85,11 @@ class _PlayScreenState extends State<PlayScreen>
             leading: IconButton(
               icon: const Icon(Icons.keyboard_arrow_down_rounded,
                   size: 35, color: Colors.black),
-              onPressed: () {},
+              onPressed: () {
+                widget.onMinimize(
+                    currentSong, _audioHandler.audioPlayer.playing);
+                Navigator.pop(context);
+              },
             ),
           ),
           body: Padding(
@@ -91,7 +97,11 @@ class _PlayScreenState extends State<PlayScreen>
             child: Column(
               children: [
                 SizedBox(height: 30.h),
-                _buildArtwork(currentSong, _audioHandler.audioPlayer.playing),
+                Hero(
+                  tag: 'artworkHero',
+                  child: _buildArtwork(
+                      currentSong, _audioHandler.audioPlayer.playing),
+                ),
                 SizedBox(height: 30.h),
                 Text(
                   currentSong['title'] ?? 'Unknown Title',

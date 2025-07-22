@@ -2,11 +2,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:i_tunes/models/all_models.dart';
 import 'package:i_tunes/view/Song_Player/audio_handler.dart';
+import 'package:i_tunes/view/Song_Player/play_screen.dart';
 import 'package:i_tunes/view/feedback_screen.dart';
 import 'package:i_tunes/view/home_screen.dart';
 import 'package:i_tunes/view/local_song.dart';
 import 'package:i_tunes/view/playlist_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class BottomBar extends StatefulWidget {
   final AudioPlayerHandler audioHandler;
@@ -19,6 +21,9 @@ class BottomBar extends StatefulWidget {
 class _BottomBarState extends State<BottomBar> {
   int _currentIndex = 0;
   List<SongModel> _playlist = [];
+
+  Map<String, String>? _currentSong;
+  bool _isPlaying = false;
 
   @override
   void initState() {
@@ -50,6 +55,13 @@ class _BottomBarState extends State<BottomBar> {
     });
   }
 
+  void _updateMiniPlayer(Map<String, String> currentSong, bool isPlaying) {
+    setState(() {
+      _currentSong = currentSong;
+      _isPlaying = isPlaying;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final screens = [
@@ -57,18 +69,27 @@ class _BottomBarState extends State<BottomBar> {
         audioHandler: widget.audioHandler,
         playlist: _playlist,
         onPlaylistChanged: _updatePlaylist,
+        onMinimize: _updateMiniPlayer,
       ),
       PlaylistScreen(
         playlistSongs: _playlist,
         onPlaylistChanged: _updatePlaylist,
         audioHandler: widget.audioHandler,
+        onMinimize: _updateMiniPlayer,
       ),
       const LocalSongScreen(),
       const FeedbackScreen(),
     ];
 
     return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: screens),
+      body: Column(
+        children: [
+          Expanded(
+            child: IndexedStack(index: _currentIndex, children: screens),
+          ),
+          if (_currentSong != null) _buildMiniPlayer(),
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         type: BottomNavigationBarType.shifting,
@@ -84,6 +105,84 @@ class _BottomBarState extends State<BottomBar> {
           BottomNavigationBarItem(
               icon: Icon(Icons.feedback), label: 'Feedback'),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMiniPlayer() {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => PlayScreen(
+              songs: [_currentSong!],
+              initialIndex: 0,
+              audioHandler: widget.audioHandler,
+              onMinimize: _updateMiniPlayer,
+            ),
+          ),
+        );
+      },
+      child: Container(
+        color: Colors.white,
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+        child: Row(
+          children: [
+            Hero(
+              tag: 'artworkHero',
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8.r),
+                child: Image.network(
+                  _currentSong!['imageUrl']!,
+                  height: 50.h,
+                  width: 50.w,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) =>
+                      const Icon(Icons.music_note, size: 40),
+                ),
+              ),
+            ),
+            SizedBox(width: 10.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _currentSong!['title'] ?? '',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style:
+                        TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    _currentSong!['artist'] ?? '',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 12.sp, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              icon: Icon(
+                _isPlaying ? Icons.pause : Icons.play_arrow,
+                size: 30.w,
+                color: Colors.red,
+              ),
+              onPressed: () {
+                if (_isPlaying) {
+                  widget.audioHandler.pause();
+                } else {
+                  widget.audioHandler.play();
+                }
+                setState(() {
+                  _isPlaying = !_isPlaying;
+                });
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

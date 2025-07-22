@@ -12,12 +12,14 @@ class HomeScreen extends StatefulWidget {
   final AudioPlayerHandler audioHandler;
   final List<SongModel> playlist;
   final Function(List<SongModel>) onPlaylistChanged;
+  final Function(Map<String, String>, bool) onMinimize;
 
   const HomeScreen({
     super.key,
     required this.audioHandler,
     required this.playlist,
     required this.onPlaylistChanged,
+    required this.onMinimize,
   });
 
   @override
@@ -269,7 +271,10 @@ class _HomeScreenState extends State<HomeScreen> {
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
           child: ListTile(
-            leading: CircleAvatar(backgroundImage: NetworkImage(song.imageUrl)),
+            leading: Hero(
+              tag: 'artwork_${song.audioUrl}',
+              child: CircleAvatar(backgroundImage: NetworkImage(song.imageUrl)),
+            ),
             title: Text(song.title,
                 style: const TextStyle(color: Colors.white),
                 maxLines: 1,
@@ -320,6 +325,9 @@ class _HomeScreenState extends State<HomeScreen> {
               .toList(),
           initialIndex: index,
           audioHandler: widget.audioHandler,
+          onMinimize: (currentSong, isPlaying) {
+            widget.onMinimize(currentSong, isPlaying);
+          },
         ),
       ),
     );

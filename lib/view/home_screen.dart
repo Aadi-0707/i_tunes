@@ -143,106 +143,110 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.redAccent[50],
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(
-                      top: 40.h, left: 16.w, right: 16.w, bottom: 10.h),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(30),
-                            child: Image.asset(
-                              'assets/images/logo2.png',
-                              height: 40,
-                              width: 40,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          const Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Welcome,',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(height: 2),
-                              Text(
-                                'iTunes Music',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const Icon(Icons.search, color: Colors.black, size: 28),
-                    ],
-                  ),
-                ),
-                Padding(padding: EdgeInsets.only(bottom: 25.h)),
-                Container(
-                  height: 30.h,
-                  margin: EdgeInsets.only(left: 16.w),
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: categories.length,
-                    itemBuilder: (context, index) {
-                      String category = categories[index];
-                      bool isSelected = category == selectedCategory;
-
-                      return GestureDetector(
-                        onTap: () => filterSongs(category),
-                        child: Container(
-                          margin: EdgeInsets.only(right: 10.w),
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 14.w, vertical: 6.h),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? const Color.fromARGB(255, 183, 36, 23)
-                                : Colors.black45,
-                            borderRadius: BorderRadius.circular(15.r),
-                          ),
-                          child: Center(
-                            child: Text(
-                              category,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12.sp,
-                                fontWeight: isSelected
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
+          : CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding:
+                        EdgeInsets.only(top: 40.h, left: 16.w, right: 16.w),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(30),
+                              child: Image.asset(
+                                'assets/images/logo2.png',
+                                height: 40,
+                                width: 40,
+                                fit: BoxFit.cover,
                               ),
                             ),
-                          ),
+                            const SizedBox(width: 10),
+                            const Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Welcome,',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(height: 2),
+                                Text(
+                                  'iTunes Music',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                      );
-                    },
+                        const Icon(Icons.search, color: Colors.black, size: 28),
+                      ],
+                    ),
                   ),
                 ),
-                Padding(padding: EdgeInsets.only(top: 10.h)),
-                Expanded(
-                  child: ListView.builder(
-                    padding: EdgeInsets.only(top: 10.h),
-                    itemCount: selectedCategory == 'All'
-                        ? songs.length
-                        : filteredSongs.length,
-                    itemBuilder: (context, index) {
+                SliverAppBar(
+                  pinned: true,
+                  backgroundColor: Colors.redAccent[50],
+                  toolbarHeight: 35.h,
+                  automaticallyImplyLeading: false,
+                  title: SizedBox(
+                    height: 30.h,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: categories.length,
+                      itemBuilder: (context, index) {
+                        String category = categories[index];
+                        bool isSelected = category == selectedCategory;
+
+                        return GestureDetector(
+                          onTap: () => filterSongs(category),
+                          child: Container(
+                            margin: EdgeInsets.only(right: 10.w),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 14.w, vertical: 6.h),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? const Color.fromARGB(255, 183, 36, 23)
+                                  : Colors.black45,
+                              borderRadius: BorderRadius.circular(15.r),
+                            ),
+                            child: Center(
+                              child: Text(
+                                category,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12.sp,
+                                  fontWeight: isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
                       SongModel song = selectedCategory == 'All'
                           ? songs[index]
                           : filteredSongs[index];
                       return _buildSongCard(song, index);
                     },
+                    childCount: selectedCategory == 'All'
+                        ? songs.length
+                        : filteredSongs.length,
                   ),
                 ),
               ],

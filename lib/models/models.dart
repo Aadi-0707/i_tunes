@@ -3,17 +3,16 @@ class SongModel {
   final String artist;
   final String imageUrl;
   final String audioUrl;
-  bool isBookmarked; // <-- NEW FIELD
+  bool isBookmarked;
 
   SongModel({
     required this.title,
     required this.artist,
     required this.imageUrl,
     required this.audioUrl,
-    this.isBookmarked = false, // <-- DEFAULT VALUE
+    this.isBookmarked = false,
   });
 
-  /// From iTunes API JSON
   factory SongModel.fromJson(Map<String, dynamic> json) {
     final String title = json['im:name']?['label'] ?? 'Unknown Title';
     final String artist = json['im:artist']?['label'] ?? 'Unknown Artist';

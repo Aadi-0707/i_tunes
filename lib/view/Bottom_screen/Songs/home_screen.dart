@@ -6,7 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:i_tunes/models/all_models.dart';
 import 'package:i_tunes/view/Song_Player/audio_handler.dart';
 import 'package:i_tunes/view/Song_Player/play_screen.dart';
-import 'package:i_tunes/view/search_screen.dart';
+import 'package:i_tunes/view/Bottom_screen/Songs/search_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {

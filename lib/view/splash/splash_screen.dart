@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:i_tunes/view/Bottom_screen/Bottom_controller/bottom_bar.dart';
 import 'package:i_tunes/view/Song_Player/audio_handler.dart';
 import 'package:i_tunes/view/Splash/Widget/dot.dart';
 import 'package:i_tunes/view/Splash/Widget/next_arrow.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:i_tunes/view/bottom_bar.dart';
 
 class SplashScreen extends StatefulWidget {
   final AudioPlayerHandler audioHandler;

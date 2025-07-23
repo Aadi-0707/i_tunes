@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:i_tunes/models/all_models.dart';
+import 'package:i_tunes/models/models.dart';
 import 'package:i_tunes/view/Song_Player/audio_handler.dart';
 import 'package:i_tunes/view/Song_Player/play_screen.dart';
 import 'package:i_tunes/view/Bottom_screen/Feedback/feedback_screen.dart';

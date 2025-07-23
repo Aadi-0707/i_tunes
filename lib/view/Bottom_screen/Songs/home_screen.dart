@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:i_tunes/models/all_models.dart';
+import 'package:i_tunes/models/models.dart';
 import 'package:i_tunes/view/Song_Player/audio_handler.dart';
 import 'package:i_tunes/view/Song_Player/play_screen.dart';
 import 'package:i_tunes/view/Bottom_screen/Songs/search_screen.dart';

@@ -66,6 +66,7 @@ class _BottomBarState extends State<BottomBar> {
       'title': mediaItem.title,
       'artist': mediaItem.artist ?? 'Unknown Artist',
       'imageUrl': mediaItem.artUri?.toString() ?? '',
+      'audioUrl': mediaItem.extras?['url'] ?? '',
     };
   }
 
@@ -128,87 +129,111 @@ class _BottomBarState extends State<BottomBar> {
               widget.audioHandler.playbackState.map((state) => state.playing),
           builder: (context, playingSnapshot) {
             final isPlaying = playingSnapshot.data ?? false;
-            if (mediaItem == null) {
-              return const SizedBox.shrink();
-            }
+            if (mediaItem == null) return const SizedBox.shrink();
 
             final currentSong = mediaItemToMap(mediaItem);
 
-            return GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => PlayScreen(
-                      songs: [currentSong],
-                      initialIndex: 0,
-                      audioHandler: widget.audioHandler,
-                      onMinimize: (song, playing) {},
-                      isFromMiniPlayer: true,
-                    ),
+            return StreamBuilder<Duration>(
+              stream: widget.audioHandler.position,
+              builder: (context, positionSnapshot) {
+                final position = positionSnapshot.data ?? Duration.zero;
+                final duration =
+                    mediaItem.duration ?? const Duration(seconds: 1);
+                final progress = duration.inMilliseconds > 0
+                    ? position.inMilliseconds / duration.inMilliseconds
+                    : 0.0;
+
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => PlayScreen(
+                          songs: [currentSong],
+                          initialIndex: 0,
+                          audioHandler: widget.audioHandler,
+                          onMinimize: (song, playing) {},
+                          isFromMiniPlayer: true,
+                        ),
+                      ),
+                    );
+                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        color: Colors.white,
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 16.w, vertical: 5.h),
+                        child: Row(
+                          children: [
+                            Hero(
+                              tag: generateHeroTag(mediaItem),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8.r),
+                                child: mediaItem.artUri != null
+                                    ? Image.network(
+                                        mediaItem.artUri.toString(),
+                                        height: 30.h,
+                                        width: 30.w,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) =>
+                                            const Icon(Icons.music_note,
+                                                size: 40),
+                                      )
+                                    : const Icon(Icons.music_note, size: 40),
+                              ),
+                            ),
+                            SizedBox(width: 10.w),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    mediaItem.title,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(
+                                    mediaItem.artist ?? 'Unknown Artist',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                        fontSize: 12.sp, color: Colors.grey),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                isPlaying ? Icons.pause : Icons.play_arrow,
+                                size: 22.w,
+                                color: Colors.red,
+                              ),
+                              onPressed: () {
+                                if (isPlaying) {
+                                  widget.audioHandler.pause();
+                                } else {
+                                  widget.audioHandler.play();
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      LinearProgressIndicator(
+                        value: progress.clamp(0.0, 1.0),
+                        color: Colors.red,
+                        backgroundColor: Colors.grey[300],
+                        minHeight: 2,
+                      ),
+                    ],
                   ),
                 );
               },
-              child: Container(
-                color: Colors.white,
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-                child: Row(
-                  children: [
-                    Hero(
-                      tag: generateHeroTag(mediaItem),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8.r),
-                        child: mediaItem.artUri != null
-                            ? Image.network(
-                                mediaItem.artUri.toString(),
-                                height: 30.h,
-                                width: 30.w,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) =>
-                                    const Icon(Icons.music_note, size: 40),
-                              )
-                            : const Icon(Icons.music_note, size: 40),
-                      ),
-                    ),
-                    SizedBox(width: 10.w),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            mediaItem.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                                fontSize: 14.sp, fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            mediaItem.artist ?? 'Unknown Artist',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style:
-                                TextStyle(fontSize: 12.sp, color: Colors.grey),
-                          ),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        isPlaying ? Icons.pause : Icons.play_arrow,
-                        size: 22.w,
-                        color: Colors.red,
-                      ),
-                      onPressed: () {
-                        if (isPlaying) {
-                          widget.audioHandler.pause();
-                        } else {
-                          widget.audioHandler.play();
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ),
             );
           },
         );

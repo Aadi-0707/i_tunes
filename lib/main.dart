@@ -35,8 +35,7 @@ class MyApp extends StatelessWidget {
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.redAccent),
             useMaterial3: true,
           ),
-          home: AudioServiceWidget(
-              child: SplashScreen(audioHandler: audioHandler)),
+          home: SplashScreen(audioHandler: audioHandler),
         );
       },
     );

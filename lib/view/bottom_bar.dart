@@ -53,8 +53,6 @@ class _BottomBarState extends State<BottomBar> {
     });
   }
 
-  // Remove the old _updateMiniPlayer method as we'll use streams instead
-
   String generateHeroTag(MediaItem? mediaItem) {
     if (mediaItem == null) return 'unknown_unknown_';
     final title = mediaItem.title;
@@ -78,13 +76,13 @@ class _BottomBarState extends State<BottomBar> {
         audioHandler: widget.audioHandler,
         playlist: _playlist,
         onPlaylistChanged: _updatePlaylist,
-        onMinimize: (song, isPlaying) {}, // No longer needed
+        onMinimize: (song, isPlaying) {},
       ),
       PlaylistScreen(
         playlistSongs: _playlist,
         onPlaylistChanged: _updatePlaylist,
         audioHandler: widget.audioHandler,
-        onMinimize: (song, isPlaying) {}, // No longer needed
+        onMinimize: (song, isPlaying) {},
       ),
       const LocalSongScreen(),
       const FeedbackScreen(),
@@ -130,8 +128,6 @@ class _BottomBarState extends State<BottomBar> {
               widget.audioHandler.playbackState.map((state) => state.playing),
           builder: (context, playingSnapshot) {
             final isPlaying = playingSnapshot.data ?? false;
-
-            // Don't show mini player if no media is loaded
             if (mediaItem == null) {
               return const SizedBox.shrink();
             }
@@ -147,7 +143,7 @@ class _BottomBarState extends State<BottomBar> {
                       songs: [currentSong],
                       initialIndex: 0,
                       audioHandler: widget.audioHandler,
-                      onMinimize: (song, playing) {}, // No longer needed
+                      onMinimize: (song, playing) {},
                       isFromMiniPlayer: true,
                     ),
                   ),

@@ -96,8 +96,6 @@ class _PlayScreenState extends State<PlayScreen>
           stream: _audioHandler.playbackState.map((state) => state.playing),
           builder: (context, playingSnapshot) {
             final isPlaying = playingSnapshot.data ?? false;
-
-            // Fallback to original song data if mediaItem is null
             final currentSong = mediaItem != null
                 ? mediaItemToMap(mediaItem)
                 : widget.songs.isNotEmpty
@@ -115,7 +113,6 @@ class _PlayScreenState extends State<PlayScreen>
                   icon: const Icon(Icons.keyboard_arrow_down_rounded,
                       size: 35, color: Colors.black),
                   onPressed: () {
-                    // No need to call onMinimize as the mini player listens to streams
                     Navigator.pop(context);
                   },
                 ),

@@ -9,6 +9,7 @@ import 'package:i_tunes/view/local_song.dart';
 import 'package:i_tunes/view/playlist_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:audio_service/audio_service.dart';
 
 class BottomBar extends StatefulWidget {
   final AudioPlayerHandler audioHandler;
@@ -21,9 +22,6 @@ class BottomBar extends StatefulWidget {
 class _BottomBarState extends State<BottomBar> {
   int _currentIndex = 0;
   List<SongModel> _playlist = [];
-
-  Map<String, String>? _currentSong;
-  bool _isPlaying = false;
 
   @override
   void initState() {
@@ -55,11 +53,22 @@ class _BottomBarState extends State<BottomBar> {
     });
   }
 
-  void _updateMiniPlayer(Map<String, String> currentSong, bool isPlaying) {
-    setState(() {
-      _currentSong = currentSong;
-      _isPlaying = isPlaying;
-    });
+  // Remove the old _updateMiniPlayer method as we'll use streams instead
+
+  String generateHeroTag(MediaItem? mediaItem) {
+    if (mediaItem == null) return 'unknown_unknown_';
+    final title = mediaItem.title;
+    final artist = mediaItem.artist ?? 'unknown';
+    final imageUrl = mediaItem.artUri?.toString() ?? '';
+    return '${title}_${artist}_$imageUrl'.replaceAll(' ', '_');
+  }
+
+  Map<String, String> mediaItemToMap(MediaItem mediaItem) {
+    return {
+      'title': mediaItem.title,
+      'artist': mediaItem.artist ?? 'Unknown Artist',
+      'imageUrl': mediaItem.artUri?.toString() ?? '',
+    };
   }
 
   @override
@@ -69,13 +78,13 @@ class _BottomBarState extends State<BottomBar> {
         audioHandler: widget.audioHandler,
         playlist: _playlist,
         onPlaylistChanged: _updatePlaylist,
-        onMinimize: _updateMiniPlayer,
+        onMinimize: (song, isPlaying) {}, // No longer needed
       ),
       PlaylistScreen(
         playlistSongs: _playlist,
         onPlaylistChanged: _updatePlaylist,
         audioHandler: widget.audioHandler,
-        onMinimize: _updateMiniPlayer,
+        onMinimize: (song, isPlaying) {}, // No longer needed
       ),
       const LocalSongScreen(),
       const FeedbackScreen(),
@@ -87,7 +96,7 @@ class _BottomBarState extends State<BottomBar> {
           Expanded(
             child: IndexedStack(index: _currentIndex, children: screens),
           ),
-          if (_currentSong != null) _buildMiniPlayer(),
+          _buildMiniPlayer(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -110,81 +119,104 @@ class _BottomBarState extends State<BottomBar> {
   }
 
   Widget _buildMiniPlayer() {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => PlayScreen(
-              songs: [_currentSong!],
-              initialIndex: 0,
-              audioHandler: widget.audioHandler,
-              onMinimize: _updateMiniPlayer,
-              isFromMiniPlayer: true, // Prevent reinit
-            ),
-          ),
-        );
-      },
-      child: Container(
-        color: Colors.white,
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-        child: Row(
-          children: [
-            Hero(
-              tag: 'artworkHero',
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8.r),
-                child: Image.network(
-                  _currentSong!['imageUrl']!,
-                  height: 30.h,
-                  width: 30.w,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) =>
-                      const Icon(Icons.music_note, size: 40),
+    return StreamBuilder<MediaState>(
+      stream: widget.audioHandler.mediaStateStream,
+      builder: (context, snapshot) {
+        final mediaState = snapshot.data;
+        final mediaItem = mediaState?.mediaItem;
+
+        return StreamBuilder<bool>(
+          stream:
+              widget.audioHandler.playbackState.map((state) => state.playing),
+          builder: (context, playingSnapshot) {
+            final isPlaying = playingSnapshot.data ?? false;
+
+            // Don't show mini player if no media is loaded
+            if (mediaItem == null) {
+              return const SizedBox.shrink();
+            }
+
+            final currentSong = mediaItemToMap(mediaItem);
+
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PlayScreen(
+                      songs: [currentSong],
+                      initialIndex: 0,
+                      audioHandler: widget.audioHandler,
+                      onMinimize: (song, playing) {}, // No longer needed
+                      isFromMiniPlayer: true,
+                    ),
+                  ),
+                );
+              },
+              child: Container(
+                color: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                child: Row(
+                  children: [
+                    Hero(
+                      tag: generateHeroTag(mediaItem),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8.r),
+                        child: mediaItem.artUri != null
+                            ? Image.network(
+                                mediaItem.artUri.toString(),
+                                height: 30.h,
+                                width: 30.w,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) =>
+                                    const Icon(Icons.music_note, size: 40),
+                              )
+                            : const Icon(Icons.music_note, size: 40),
+                      ),
+                    ),
+                    SizedBox(width: 10.w),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            mediaItem.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                                fontSize: 14.sp, fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            mediaItem.artist ?? 'Unknown Artist',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style:
+                                TextStyle(fontSize: 12.sp, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        isPlaying ? Icons.pause : Icons.play_arrow,
+                        size: 22.w,
+                        color: Colors.red,
+                      ),
+                      onPressed: () {
+                        if (isPlaying) {
+                          widget.audioHandler.pause();
+                        } else {
+                          widget.audioHandler.play();
+                        }
+                      },
+                    ),
+                  ],
                 ),
               ),
-            ),
-            SizedBox(width: 10.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _currentSong!['title'] ?? '',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style:
-                        TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    _currentSong!['artist'] ?? '',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 12.sp, color: Colors.grey),
-                  ),
-                ],
-              ),
-            ),
-            IconButton(
-              icon: Icon(
-                _isPlaying ? Icons.pause : Icons.play_arrow,
-                size: 22.w,
-                color: Colors.red,
-              ),
-              onPressed: () {
-                if (_isPlaying) {
-                  widget.audioHandler.pause();
-                } else {
-                  widget.audioHandler.play();
-                }
-                setState(() {
-                  _isPlaying = !_isPlaying;
-                });
-              },
-            ),
-          ],
-        ),
-      ),
+            );
+          },
+        );
+      },
     );
   }
 }

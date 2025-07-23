@@ -66,6 +66,22 @@ class _PlayScreenState extends State<PlayScreen>
     return "$minutes:$seconds";
   }
 
+  String generateHeroTag(MediaItem? mediaItem) {
+    if (mediaItem == null) return 'unknown_unknown_';
+    final title = mediaItem.title;
+    final artist = mediaItem.artist ?? 'unknown';
+    final imageUrl = mediaItem.artUri?.toString() ?? '';
+    return '${title}_${artist}_$imageUrl'.replaceAll(' ', '_');
+  }
+
+  Map<String, String> mediaItemToMap(MediaItem mediaItem) {
+    return {
+      'title': mediaItem.title,
+      'artist': mediaItem.artist ?? 'Unknown Artist',
+      'imageUrl': mediaItem.artUri?.toString() ?? '',
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<MediaState>(
@@ -76,61 +92,71 @@ class _PlayScreenState extends State<PlayScreen>
         final position = mediaState?.position ?? Duration.zero;
         final duration = mediaItem?.duration ?? const Duration(seconds: 30);
 
-        final currentIndex =
-            _audioHandler.audioPlayer.currentIndex ?? widget.initialIndex;
-        final currentSong = widget.songs[currentIndex];
+        return StreamBuilder<bool>(
+          stream: _audioHandler.playbackState.map((state) => state.playing),
+          builder: (context, playingSnapshot) {
+            final isPlaying = playingSnapshot.data ?? false;
 
-        return Scaffold(
-          backgroundColor: Colors.redAccent[50],
-          appBar: AppBar(
-            backgroundColor: Colors.redAccent[50],
-            elevation: 0,
-            title: const Text('Playing', style: TextStyle(color: Colors.black)),
-            leading: IconButton(
-              icon: const Icon(Icons.keyboard_arrow_down_rounded,
-                  size: 35, color: Colors.black),
-              onPressed: () {
-                widget.onMinimize(
-                    currentSong, _audioHandler.audioPlayer.playing);
-                Navigator.pop(context);
-              },
-            ),
-          ),
-          body: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.0.w, vertical: 20.h),
-            child: Column(
-              children: [
-                SizedBox(height: 30.h),
-                Hero(
-                  tag: 'artworkHero',
-                  child: _buildArtwork(
-                      currentSong, _audioHandler.audioPlayer.playing),
+            // Fallback to original song data if mediaItem is null
+            final currentSong = mediaItem != null
+                ? mediaItemToMap(mediaItem)
+                : widget.songs.isNotEmpty
+                    ? widget.songs[widget.initialIndex]
+                    : {'title': 'Unknown', 'artist': 'Unknown', 'imageUrl': ''};
+
+            return Scaffold(
+              backgroundColor: Colors.redAccent[50],
+              appBar: AppBar(
+                backgroundColor: Colors.redAccent[50],
+                elevation: 0,
+                title: const Text('Playing',
+                    style: TextStyle(color: Colors.black)),
+                leading: IconButton(
+                  icon: const Icon(Icons.keyboard_arrow_down_rounded,
+                      size: 35, color: Colors.black),
+                  onPressed: () {
+                    // No need to call onMinimize as the mini player listens to streams
+                    Navigator.pop(context);
+                  },
                 ),
-                SizedBox(height: 30.h),
-                Text(
-                  currentSong['title'] ?? 'Unknown Title',
-                  textAlign: TextAlign.center,
-                  style:
-                      TextStyle(fontSize: 22.sp, fontWeight: FontWeight.bold),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+              ),
+              body: Padding(
+                padding:
+                    EdgeInsets.symmetric(horizontal: 24.0.w, vertical: 20.h),
+                child: Column(
+                  children: [
+                    SizedBox(height: 30.h),
+                    Hero(
+                      tag: generateHeroTag(mediaItem),
+                      child: _buildArtwork(currentSong, isPlaying),
+                    ),
+                    SizedBox(height: 30.h),
+                    Text(
+                      currentSong['title'] ?? 'Unknown Title',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 22.sp, fontWeight: FontWeight.bold),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      currentSong['artist'] ?? 'Unknown Artist',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 18.sp, fontWeight: FontWeight.w400),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 20.h),
+                    _buildSlider(position, duration),
+                    SizedBox(height: 20.h),
+                    _buildControls(isPlaying),
+                  ],
                 ),
-                SizedBox(height: 4.h),
-                Text(
-                  currentSong['artist'] ?? 'Unknown Artist',
-                  textAlign: TextAlign.center,
-                  style:
-                      TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w400),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SizedBox(height: 20.h),
-                _buildSlider(position, duration),
-                SizedBox(height: 20.h),
-                _buildControls(),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
@@ -209,33 +235,23 @@ class _PlayScreenState extends State<PlayScreen>
     );
   }
 
-  Widget _buildControls() {
-    return StreamBuilder<PlaybackState>(
-      stream: _audioHandler.playbackState,
-      builder: (context, snapshot) {
-        final state = snapshot.data;
-        final isPlaying = state?.playing ?? false;
-
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            IconButton(
-                icon: Icon(Icons.skip_previous, size: 35.w),
-                onPressed: _playPrevious),
-            IconButton(
-              icon: Icon(
-                  isPlaying
-                      ? Icons.pause_circle_filled
-                      : Icons.play_circle_fill,
-                  color: Colors.red,
-                  size: 60.w),
-              onPressed: () => _togglePlayPause(isPlaying),
-            ),
-            IconButton(
-                icon: Icon(Icons.skip_next, size: 35.w), onPressed: _playNext),
-          ],
-        );
-      },
+  Widget _buildControls(bool isPlaying) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        IconButton(
+            icon: Icon(Icons.skip_previous, size: 35.w),
+            onPressed: _playPrevious),
+        IconButton(
+          icon: Icon(
+              isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill,
+              color: Colors.red,
+              size: 60.w),
+          onPressed: () => _togglePlayPause(isPlaying),
+        ),
+        IconButton(
+            icon: Icon(Icons.skip_next, size: 35.w), onPressed: _playNext),
+      ],
     );
   }
 }

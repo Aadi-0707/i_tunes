@@ -1,5 +1,5 @@
-// search_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:i_tunes/models/all_models.dart';
 import 'package:i_tunes/view/Song_Player/play_screen.dart';
 import 'package:i_tunes/view/Song_Player/audio_handler.dart';
@@ -9,10 +9,10 @@ class SearchScreen extends StatefulWidget {
   final AudioPlayerHandler audioHandler;
 
   const SearchScreen({
-    super.key,
+    Key? key,
     required this.allSongs,
     required this.audioHandler,
-  });
+  }) : super(key: key);
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -66,22 +66,40 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Search Songs")),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(12),
+      backgroundColor: Colors.white,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(40.h),
+        child: AppBar(
+          automaticallyImplyLeading: true,
+          elevation: 2,
+          backgroundColor: Colors.redAccent[50],
+          title: Padding(
+            padding: EdgeInsets.only(top: 8.h),
             child: TextField(
               controller: _controller,
+              cursorColor: Colors.black,
               decoration: InputDecoration(
                 hintText: "Search by title or artist",
                 prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: EdgeInsets.symmetric(vertical: 10.h),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                  borderSide: const BorderSide(color: Colors.grey),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                  borderSide: const BorderSide(color: Colors.grey),
+                ),
               ),
             ),
           ),
-          Expanded(
-            child: ListView.builder(
+        ),
+      ),
+      body: _filtered.isEmpty
+          ? const Center(child: Text("No songs found."))
+          : ListView.builder(
               itemCount: _filtered.length,
               itemBuilder: (context, index) {
                 final song = _filtered[index];
@@ -95,9 +113,6 @@ class _SearchScreenState extends State<SearchScreen> {
                 );
               },
             ),
-          ),
-        ],
-      ),
     );
   }
 }

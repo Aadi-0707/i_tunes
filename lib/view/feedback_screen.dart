@@ -113,7 +113,7 @@ class _FeedbackScreenState extends State<FeedbackScreen>
                     decoration: InputDecoration(
                       hintText: "Write your feedback...",
                       filled: true,
-                      fillColor: Colors.white.withOpacity(0.8),
+                      fillColor: Colors.white.withAlpha(80),
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.r)),
                     ),

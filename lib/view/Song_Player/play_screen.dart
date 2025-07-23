@@ -223,7 +223,7 @@ class _PlayScreenState extends State<PlayScreen>
             activeColor: Colors.red,
             inactiveColor: Colors.grey[300],
             onChanged: (double value) {
-              _audioHandler.seekTo(Duration(milliseconds: value.toInt()));
+              _audioHandler.seek(Duration(milliseconds: value.toInt()));
             },
           ),
         ),

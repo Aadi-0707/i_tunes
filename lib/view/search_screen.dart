@@ -66,39 +66,68 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.redAccent[50],
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(40.h),
-        child: AppBar(
-          automaticallyImplyLeading: true,
-          elevation: 2,
-          backgroundColor: Colors.redAccent[50],
-          title: Padding(
-            padding: EdgeInsets.only(top: 8.h),
-            child: TextField(
-              controller: _controller,
-              cursorColor: Colors.black,
-              decoration: InputDecoration(
-                hintText: "Search by title or artist",
-                prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: EdgeInsets.symmetric(vertical: 10.h),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: const BorderSide(color: Colors.grey),
+        preferredSize: Size.fromHeight(70.h),
+        child: Padding(
+          padding: EdgeInsets.only(top: 40.h, right: 10.w),
+          child: Row(
+            children: [
+              IconButton(
+                icon: const Icon(
+                  Icons.arrow_back_ios_rounded,
+                  color: Colors.black87,
+                  size: 30,
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: const BorderSide(color: Colors.grey),
+                onPressed: () => Navigator.pop(context),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(right: 5.w, bottom: 5.h),
+                  child: Container(
+                    height: 35.h,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(30.r),
+                    ),
+                    child: Row(
+                      children: [
+                        SizedBox(width: 5.w),
+                        Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(left: 10.w),
+                            child: TextField(
+                              controller: _controller,
+                              cursorColor: Colors.black,
+                              style: const TextStyle(color: Colors.black),
+                              decoration: InputDecoration(
+                                hintText: 'Search songs, artists, podcasts...',
+                                hintStyle: TextStyle(color: Colors.grey[600]),
+                                border: InputBorder.none,
+                              ),
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.mic, color: Colors.black),
+                          onPressed: () {},
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
         ),
       ),
       body: _filtered.isEmpty
-          ? const Center(child: Text("No songs found."))
+          ? const Center(
+              child: Text(
+                "No songs found.",
+                style: TextStyle(color: Colors.black),
+              ),
+            )
           : ListView.builder(
               itemCount: _filtered.length,
               itemBuilder: (context, index) {
@@ -107,8 +136,10 @@ class _SearchScreenState extends State<SearchScreen> {
                   leading: CircleAvatar(
                     backgroundImage: NetworkImage(song.imageUrl),
                   ),
-                  title: Text(song.title),
-                  subtitle: Text(song.artist),
+                  title: Text(song.title,
+                      style: const TextStyle(color: Colors.black)),
+                  subtitle: Text(song.artist,
+                      style: TextStyle(color: Colors.grey[600])),
                   onTap: () => _playSong(index),
                 );
               },

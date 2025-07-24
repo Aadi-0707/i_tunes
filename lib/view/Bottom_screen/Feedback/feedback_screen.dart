@@ -71,7 +71,7 @@ class _FeedbackScreenState extends State<FeedbackScreen>
       appBar: AppBar(
         backgroundColor: Colors.redAccent[50],
         elevation: 0,
-        title: const Text('  Feedback', style: TextStyle(color: Colors.black)),
+        title: const Text(' Feedback', style: TextStyle(color: Colors.black)),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.w),

@@ -101,16 +101,21 @@ class _SearchScreenState extends State<SearchScreen> {
                               cursorColor: Colors.black,
                               style: const TextStyle(color: Colors.black),
                               decoration: InputDecoration(
-                                hintText: 'Search songs, artists, podcasts...',
+                                hintText: 'Search songs, artists ...',
                                 hintStyle: TextStyle(color: Colors.grey[600]),
                                 border: InputBorder.none,
                               ),
                             ),
                           ),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.mic, color: Colors.black),
-                          onPressed: () {},
+                        Container(
+                          height: 28.h,
+                          decoration: BoxDecoration(
+                              color: Colors.black26, shape: BoxShape.circle),
+                          child: IconButton(
+                            icon: const Icon(Icons.mic, color: Colors.black),
+                            onPressed: () {},
+                          ),
                         ),
                       ],
                     ),

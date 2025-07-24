@@ -87,7 +87,7 @@ class _BottomBarState extends State<BottomBar> {
           onMinimize: (song, isPlaying) {},
         ),
         const LocalSongScreen(),
-        const FeedbackScreen(), // Will be recreated each time
+        const FeedbackScreen(),
       ];
     }
 

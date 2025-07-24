@@ -72,28 +72,30 @@ class _BottomBarState extends State<BottomBar> {
 
   @override
   Widget build(BuildContext context) {
-    final screens = [
-      HomeScreen(
-        audioHandler: widget.audioHandler,
-        playlist: _playlist,
-        onPlaylistChanged: _updatePlaylist,
-        onMinimize: (song, isPlaying) {},
-      ),
-      PlaylistScreen(
-        playlistSongs: _playlist,
-        onPlaylistChanged: _updatePlaylist,
-        audioHandler: widget.audioHandler,
-        onMinimize: (song, isPlaying) {},
-      ),
-      const LocalSongScreen(),
-      const FeedbackScreen(),
-    ];
+    List<Widget> getScreens() {
+      return [
+        HomeScreen(
+          audioHandler: widget.audioHandler,
+          playlist: _playlist,
+          onPlaylistChanged: _updatePlaylist,
+          onMinimize: (song, isPlaying) {},
+        ),
+        PlaylistScreen(
+          playlistSongs: _playlist,
+          onPlaylistChanged: _updatePlaylist,
+          audioHandler: widget.audioHandler,
+          onMinimize: (song, isPlaying) {},
+        ),
+        const LocalSongScreen(),
+        const FeedbackScreen(), // Will be recreated each time
+      ];
+    }
 
     return Scaffold(
       body: Column(
         children: [
           Expanded(
-            child: IndexedStack(index: _currentIndex, children: screens),
+            child: getScreens()[_currentIndex],
           ),
           _buildMiniPlayer(),
         ],

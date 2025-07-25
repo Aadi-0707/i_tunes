@@ -9,10 +9,10 @@ class SearchScreen extends StatefulWidget {
   final AudioPlayerHandler audioHandler;
 
   const SearchScreen({
-    Key? key,
+    super.key,
     required this.allSongs,
     required this.audioHandler,
-  }) : super(key: key);
+  });
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();

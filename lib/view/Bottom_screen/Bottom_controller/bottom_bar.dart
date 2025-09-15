@@ -5,7 +5,6 @@ import 'package:i_tunes/view/Song_Player/audio_handler.dart';
 import 'package:i_tunes/view/Song_Player/play_screen.dart';
 import 'package:i_tunes/view/Bottom_screen/Feedback/feedback_screen.dart';
 import 'package:i_tunes/view/Bottom_screen/Songs/home_screen.dart';
-import 'package:i_tunes/view/Bottom_screen/local/local_song.dart';
 import 'package:i_tunes/view/Bottom_screen/Playlist/playlist_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -86,7 +85,6 @@ class _BottomBarState extends State<BottomBar> {
           audioHandler: widget.audioHandler,
           onMinimize: (song, isPlaying) {},
         ),
-        const LocalSongScreen(),
         const FeedbackScreen(),
       ];
     }
@@ -111,7 +109,6 @@ class _BottomBarState extends State<BottomBar> {
           BottomNavigationBarItem(icon: Icon(Icons.music_note), label: 'Songs'),
           BottomNavigationBarItem(
               icon: Icon(Icons.queue_music), label: 'Playlist'),
-          BottomNavigationBarItem(icon: Icon(Icons.folder), label: 'Local'),
           BottomNavigationBarItem(
               icon: Icon(Icons.feedback), label: 'Feedback'),
         ],
